@@ -6,7 +6,7 @@ mongoose.connect(process.env.MONGODB_URI ||
 const schema = new mongoose.Schema({
     email: {
         type: String,
-        match: /[^\\.\\s@:](?:[^\\s@:]*[^\\s@:\\.])?@[^\\.\\s@]+(?:\\.[^\\.\\s@]+)*/,
+        match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
         required: true,
 
         unique: true
@@ -18,10 +18,17 @@ const schema = new mongoose.Schema({
     },
     hash: { 
         type: String,
-        match: /^[a-f0-9]{64}$/,
+        match: /^\$2[ayb]\$.{56}$/,
         required: true 
     }
-})
+});
+
+schema.set("toJSON", {
+    transform: (_, object) => {
+      delete object.__v;
+      delete object.hash;
+    }
+});
 
 const User = mongoose.model("User", schema);
 
