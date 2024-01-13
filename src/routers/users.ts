@@ -1,10 +1,11 @@
 import express, {
-    NextFunction,
     Request,
     Response
 } from "express";
 
 import z from "zod";
+
+import bcryptjs from "bcryptjs";
 
 import validateWithSchema from "./middlewares/validateWithSchema";
 
@@ -28,8 +29,16 @@ router.post(
             .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
                 "You must provide a valid password.")
     })),
-    async (req: Request, res: Response, next: NextFunction) => {
-        
+    async (req: Request, res: Response) => {
+        const { email, username, password } = req.body;
+
+        const salt = bcryptjs.genSaltSync(10);
+        const hash = bcryptjs.hashSync(password, salt);
+        const user = new User({ email, username, hash });
+
+        await user.save();
+
+        res.status(201).json(user);
     }
 );
 
