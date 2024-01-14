@@ -6,7 +6,7 @@ import {
 
 import z from "zod";
 
-export default function(schema: z.ZodObject<any>): (req: Request, res: Response, next: NextFunction) => void {
+export default function(schema: z.ZodType<any>): (req: Request, res: Response, next: NextFunction) => void {
     return (req: Request, _: Response, next: NextFunction): void => {
         schema.parseAsync(req.body)
             .then(_ => next())

@@ -23,7 +23,7 @@ router.get(
         User.findOne({ _id: req.user!.sub })
             .then(user => res.status(200).json(user));
     }
-)
+);
 
 router.post(
     "/",
@@ -53,5 +53,38 @@ router.post(
             .catch(error => next(error));
     }
 );
+
+router.patch(
+    "/password/",
+    expressJwtAuthentication({}),
+    validateWithSchema(
+        z.object({
+            password: z.string()
+                .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
+                    "You must provide a valid password."),
+
+            oldPassword: z.string()
+        })
+            .refine((obj) => obj.password != obj.oldPassword,
+                "Your new password can't be equal to your current one.")
+    ),
+    async (req: Request, res: Response) => {
+        const { password, oldPassword } = req.body;
+
+        const user = await User.findOne({ _id: req.user!.sub });
+
+        if (!bcrypt.compareSync(oldPassword, user!.hash))
+            return res.status(400).json({ error: 
+                "Old password does not match your current one." });
+
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
+        user!.hash = hash;
+
+        await user!.save();
+
+        res.status(204).json();
+    }
+)
 
 export default router;
