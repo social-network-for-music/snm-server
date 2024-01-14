@@ -32,6 +32,21 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
                     error => [ error.path[0], error.message ]))
             });
 
+        case "JsonWebTokenError":
+        case "NotBeforeError":
+        case "TokenExpiredError":
+
+        case "MissingAuthorizationHeaderError":
+        case "InvalidAuthorizationHeaderError":
+        case "MissingTokenError":
+        case "RevokedTokenError":
+        case "ClaimNotAllowedError":
+            res.status(401);
+
+            return res.json({ 
+                error: err.message
+            });
+
         default:
             console.log(err);
 

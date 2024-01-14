@@ -20,7 +20,7 @@ router.get(
     "/",
     expressJwtAuthentication({}),
     (req: Request, res: Response) => {
-        User.find({ _id: req.user!.sub })
+        User.findOne({ _id: req.user!.sub })
             .then(user => res.status(200).json(user));
     }
 )

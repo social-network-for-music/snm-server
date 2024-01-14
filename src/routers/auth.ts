@@ -32,7 +32,9 @@ router.post(
             return res.status(401).json({ error: 
                 "No user found with the given credentials." });
 
-        const token = jwt.sign({ sub: user._id }, SECRET);
+        const token = jwt.sign({ sub: user._id }, SECRET, {
+            expiresIn: "2h"
+        });
 
         return res.status(200).json({ token });
     }
