@@ -1,4 +1,5 @@
 import express, {
+    NextFunction,
     Request,
     Response
 } from "express";
@@ -29,16 +30,16 @@ router.post(
             .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
                 "You must provide a valid password.")
     })),
-    async (req: Request, res: Response) => {
+    (req: Request, res: Response, next: NextFunction) => {
         const { email, username, password } = req.body;
 
         const salt = bcryptjs.genSaltSync(10);
         const hash = bcryptjs.hashSync(password, salt);
         const user = new User({ email, username, hash });
 
-        await user.save();
-
-        res.status(201).json(user);
+        user.save()
+            .then(data => res.status(201).json(data))
+            .catch(error => next(error));
     }
 );
 

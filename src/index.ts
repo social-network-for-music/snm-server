@@ -27,6 +27,15 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
                 errors: Object.fromEntries((<ZodError>err).errors.map(
                     error => [ error.path[0], error.message ]))
             });
+
+        default:
+            console.log(err);
+
+            res.status(500);
+
+            return res.json({
+                error: "Internal server error: try again later..."
+            });
     }
 });
 
