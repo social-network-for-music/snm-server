@@ -20,7 +20,7 @@ router.get(
     "/",
     expressJwtAuthentication({}),
     (req: Request, res: Response) => {
-        User.findOne({ _id: req.user!.sub })
+        User.findById(req.user!.sub)
             .then(user => res.status(200).json(user));
     }
 );
@@ -55,6 +55,27 @@ router.post(
 );
 
 router.patch(
+    "/",
+    expressJwtAuthentication({}),
+    validateWithSchema(z.object({
+        username: z.string()
+            .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+                "You must provide a valid username."),
+    })),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const { username } = req.body;
+
+        const user = await User.findById(req.user!.sub);
+            
+        user!.username = username;
+
+        user!.save()
+            .then(data => res.status(200).json(data))
+            .catch(error => next(error));
+    }
+);
+
+router.patch(
     "/password/",
     expressJwtAuthentication({}),
     validateWithSchema(
@@ -71,7 +92,7 @@ router.patch(
     async (req: Request, res: Response) => {
         const { password, oldPassword } = req.body;
 
-        const user = await User.findOne({ _id: req.user!.sub });
+        const user = await User.findById(req.user!.sub);
 
         if (!bcrypt.compareSync(oldPassword, user!.hash))
             return res.status(400).json({ error: 
