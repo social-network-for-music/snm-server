@@ -6,13 +6,24 @@ import express, {
 
 import z from "zod";
 
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
+
+import expressJwtAuthentication from "express-jwt-authentication";
 
 import validateWithSchema from "./middlewares/validateWithSchema";
 
 import User from "../models/User";
 
 const router = express.Router();
+
+router.get(
+    "/",
+    expressJwtAuthentication({}),
+    (req: Request, res: Response) => {
+        User.find({ _id: req.user!.sub })
+            .then(user => res.status(200).json(user));
+    }
+)
 
 router.post(
     "/",
@@ -33,8 +44,8 @@ router.post(
     (req: Request, res: Response, next: NextFunction) => {
         const { email, username, password } = req.body;
 
-        const salt = bcryptjs.genSaltSync(10);
-        const hash = bcryptjs.hashSync(password, salt);
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(password, salt);
         const user = new User({ email, username, hash });
 
         user.save()

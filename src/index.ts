@@ -6,15 +6,19 @@ import express, {
 
 import { ZodError } from "zod";
 
-import users from "./routers/users";
-
 import "dotenv/config";
+
+import auth from "./routers/auth";
+
+import users from "./routers/users";
 
 const app = express();
 
 const port = process.env.PORT || 3500;
 
 app.use(express.json());
+
+app.use("/api/auth", auth);
 
 app.use("/api/users", users);
 
