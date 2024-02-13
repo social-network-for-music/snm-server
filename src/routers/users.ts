@@ -23,7 +23,7 @@ router.get(
     expressJwtAuthentication({}),
     (req: Request, res: Response) => {
         User.findById(req.user!.sub)
-            .then(user => res.status(200).json(user));
+            .then(user => res.json(user));
     }
 );
 
@@ -76,7 +76,7 @@ router.patch(
         user!.username = username;
 
         user!.save()
-            .then(data => res.status(200).json(data))
+            .then(data => res.json(data))
             .catch(error => next(error));
     }
 );
@@ -120,7 +120,7 @@ router.patch(
 
         await user!.save();
 
-        res.status(204).json();
+        res.status(204).end();
     }
 );
 

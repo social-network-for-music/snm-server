@@ -20,6 +20,16 @@ const schema = new mongoose.Schema({
         type: String,
         match: /^\$2[ayb]\$.{56}$/,
         required: true 
+    },
+    artists: {
+        type: [String],
+
+        default: []
+    },
+    genres: {
+        type: [String],
+        
+        default: []
     }
 });
 

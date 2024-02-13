@@ -41,7 +41,7 @@ router.post(
             expiresIn: "2h"
         });
 
-        return res.status(200).json({ token });
+        return res.json({ token });
     }
 );
 

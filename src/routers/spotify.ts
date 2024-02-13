@@ -13,6 +13,8 @@ import {
     NotFoundError 
 } from "../errors";
 
+import User from "../models/User";
+
 const SDK = new Spotify({
     clientId: process.env.SPOTIFY_CLIENT_ID!,
 
@@ -60,6 +62,24 @@ router.get(
         SDK.genres()
             .then(genres => res.json(genres))
             .catch(error => next(error));
+    }
+);
+
+router.get(
+    "/recommendations/",
+    expressJwtAuthentication({}),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const user = await User.findById(req.user!.sub);
+
+        SDK.recommendations(user!.artists, user!.genres)
+            .then(tracks => res.json(tracks))
+            .catch(error => {
+                if (error.response?.status == 400)
+                    return next(new BadRequestError(
+                        "You must first set your favorite artists and genres."));
+
+                next(error);
+            });
     }
 );
 
