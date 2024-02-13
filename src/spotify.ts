@@ -17,7 +17,7 @@ export default class Spotify {
         this.options = options;
     }
 
-    private send(path: string): Promise<AxiosResponse> {
+    private send(path: string): Promise<AxiosResponse<any>> {
         return axios(API + path, {
             headers: {
                 "Authorization": `Bearer ${this.token}`

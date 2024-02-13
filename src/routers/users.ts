@@ -14,6 +14,8 @@ import validateWithSchema from "./middlewares/validateWithSchema";
 
 import User from "../models/User";
 
+import { BadRequestError } from "../errors";
+
 const router = express.Router();
 
 router.get(
@@ -103,14 +105,14 @@ router.patch(
             .refine((obj) => obj.password != obj.oldPassword,
                 "Your new password can't be equal to your current one.")
     }),
-    async (req: Request, res: Response) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         const { password, oldPassword } = req.body;
 
         const user = await User.findById(req.user!.sub);
 
         if (!bcrypt.compareSync(oldPassword, user!.hash))
-            return res.status(400).json({ error: 
-                "Old password does not match your current one." });
+            return next(new BadRequestError(
+                "Old password does not match your current one."));
 
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);

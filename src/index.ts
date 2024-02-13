@@ -9,10 +9,10 @@ import { ZodError } from "zod";
 import "dotenv/config";
 
 import auth from "./routers/auth";
-
 import users from "./routers/users";
-
 import spotify from "./routers/spotify";
+
+import { HttpError } from "./errors";
 
 const app = express();
 
@@ -21,21 +21,36 @@ const port = process.env.PORT || 3500;
 app.use(express.json());
 
 app.use("/api/auth", auth);
-
 app.use("/api/users", users);
-
 app.use("/api/spotify", spotify);
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    switch (err.name) {
-        case "ZodError":
-            res.status(400);
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    if (error instanceof ZodError) {
+        res.status(400);
 
-            return res.json({
-                errors: Object.fromEntries((<ZodError> err).errors.map(
-                    error => [ error.path[0], error.message ]))
-            });
+        return res.json({
+            errors: Object.fromEntries((error).errors.map(
+                error => [ error.path[0], error.message ]))
+        });
+    }
 
+    next(error);
+});
+
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    if (error instanceof HttpError) {
+        res.status(error.code);
+
+        return res.json({
+            error: error.message
+        })
+    }
+
+    next(error);
+});
+
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    switch(error.name) {
         case "JsonWebTokenError":
         case "NotBeforeError":
         case "TokenExpiredError":
@@ -48,18 +63,21 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
             res.status(401);
 
             return res.json({ 
-                error: err.message
-            });
-
-        default:
-            console.log(err);
-
-            res.status(500);
-
-            return res.json({
-                error: "Internal server error: try again later..."
+                error: error.message
             });
     }
+
+    next(error);
+});
+
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    console.log(error);
+
+    res.status(500);
+
+    return res.json({
+        error: "Internal server error: try again later..."
+    }); 
 });
 
 app.get("/api/ping", (_: Request, res: Response) => {

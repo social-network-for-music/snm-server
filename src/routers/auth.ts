@@ -1,4 +1,5 @@
 import express, {
+    NextFunction,
     Request,
     Response
 } from "express";
@@ -13,6 +14,8 @@ import validateWithSchema from "./middlewares/validateWithSchema";
 
 import User from "../models/User";
 
+import { NotFoundError } from "../errors";
+
 const SECRET = process.env.EXPRESS_JWT_AUTHENTICATION_SECRET!;
 
 const router = express.Router();
@@ -25,14 +28,14 @@ router.post(
             password: z.string()
         })
     }),
-    async (req: Request, res: Response) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
 
         if (!user || !bcrypt.compareSync(password, user.hash))
-            return res.status(401).json({ error: 
-                "No user found with the given credentials." });
+            return next(new NotFoundError(
+                "No user found with the given credentials."));
 
         const token = jwt.sign({ sub: user._id }, SECRET, {
             expiresIn: "2h"
