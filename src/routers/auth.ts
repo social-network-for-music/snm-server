@@ -19,10 +19,12 @@ const router = express.Router();
 
 router.post(
     "/login",
-    validateWithSchema(z.object({
-        email: z.string(),
-        password: z.string()
-    })),
+    validateWithSchema({
+        body: z.object({
+            email: z.string(),
+            password: z.string()
+        })
+    }),
     async (req: Request, res: Response) => {
         const { email, password } = req.body;
 

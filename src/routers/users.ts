@@ -27,20 +27,22 @@ router.get(
 
 router.post(
     "/",
-    validateWithSchema(z.object({
-        email: z.string()
-            .email("You must provide a valid e-mail address.")
-            .refine(async (email) => !(await User.findOne({ email })),
-                "E-mail address already in use by another account."),
+    validateWithSchema({
+        body: z.object({
+            email: z.string()
+                .email("You must provide a valid e-mail address.")
+                .refine(async (email) => !(await User.findOne({ email })),
+                    "E-mail address already in use by another account."),
 
-        username: z.string()
-            .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-                "You must provide a valid username."),
+            username: z.string()
+                .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+                    "You must provide a valid username."),
 
-        password: z.string()
-            .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
-                "You must provide a valid password.")
-    })),
+            password: z.string()
+                .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
+                    "You must provide a valid password.")
+        })
+    }),
     (req: Request, res: Response, next: NextFunction) => {
         const { email, username, password } = req.body;
 
@@ -57,11 +59,13 @@ router.post(
 router.patch(
     "/",
     expressJwtAuthentication({}),
-    validateWithSchema(z.object({
-        username: z.string()
-            .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-                "You must provide a valid username."),
-    })),
+    validateWithSchema({
+        body: z.object({
+            username: z.string()
+                .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+                    "You must provide a valid username."),
+        })
+    }),
     async (req: Request, res: Response, next: NextFunction) => {
         const { username } = req.body;
 
@@ -78,8 +82,8 @@ router.patch(
 router.patch(
     "/password/",
     expressJwtAuthentication({}),
-    validateWithSchema(
-        z.object({
+    validateWithSchema({
+        body: z.object({
             password: z.string()
                 .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
                     "You must provide a valid password."),
@@ -88,7 +92,7 @@ router.patch(
         })
             .refine((obj) => obj.password != obj.oldPassword,
                 "Your new password can't be equal to your current one.")
-    ),
+    }),
     async (req: Request, res: Response) => {
         const { password, oldPassword } = req.body;
 
