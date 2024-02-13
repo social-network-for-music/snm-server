@@ -12,6 +12,8 @@ import auth from "./routers/auth";
 
 import users from "./routers/users";
 
+import spotify from "./routers/spotify";
+
 const app = express();
 
 const port = process.env.PORT || 3500;
@@ -22,13 +24,15 @@ app.use("/api/auth", auth);
 
 app.use("/api/users", users);
 
+app.use("/api/spotify", spotify);
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     switch (err.name) {
         case "ZodError":
             res.status(400);
 
             return res.json({
-                errors: Object.fromEntries((<ZodError>err).errors.map(
+                errors: Object.fromEntries((<ZodError> err).errors.map(
                     error => [ error.path[0], error.message ]))
             });
 

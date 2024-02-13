@@ -13,7 +13,7 @@ import validateWithSchema from "./middlewares/validateWithSchema";
 
 import User from "../models/User";
 
-const SECRET = <string> process.env.EXPRESS_JWT_AUTHENTICATION_SECRET;
+const SECRET = process.env.EXPRESS_JWT_AUTHENTICATION_SECRET!;
 
 const router = express.Router();
 
