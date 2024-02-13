@@ -78,4 +78,8 @@ export default class Spotify {
     public track(id: string) {
         return this.middleware(`/tracks/${id}`);
     }
+
+    public artist(id: string) {
+        return this.middleware(`/artists/${id}`);
+    }
 }

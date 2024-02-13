@@ -103,4 +103,24 @@ router.get(
     }
 );
 
+router.get(
+    "/artists/:id/",
+    expressJwtAuthentication({}),
+    (req: Request, res: Response, next: NextFunction) => {
+        SDK.artist(req.params.id)
+            .then(artist => res.json(artist))
+            .catch(error => {
+                if (error.response?.status == 400)
+                    return next(new BadRequestError(
+                        "You must provide a valid ID."));
+
+                if (error.response?.status == 404)
+                    return next(new NotFoundError(
+                        "Can't find an artist with the given ID."));
+
+                next(error);
+            });
+    }
+);
+
 export default router;
