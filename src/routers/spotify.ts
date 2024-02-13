@@ -20,7 +20,7 @@ const SDK = new Spotify({
 const router = express.Router();
 
 router.get(
-    "/tracks",
+    "/tracks/",
     expressJwtAuthentication({}),
     validateWithSchema({
         query: z.object({
@@ -35,7 +35,7 @@ router.get(
 );
 
 router.get(
-    "/artists",
+    "/artists/",
     expressJwtAuthentication({}),
     validateWithSchema({
         query: z.object({
@@ -50,7 +50,7 @@ router.get(
 );
 
 router.get(
-    "/genres",
+    "/genres/",
     expressJwtAuthentication({}),
     (req: Request, res: Response) => { 
         SDK.genres().then(genres => 

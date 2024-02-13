@@ -79,6 +79,16 @@ router.patch(
     }
 );
 
+router.delete(
+    "/",
+    expressJwtAuthentication({}),
+    (req: Request, res: Response, next: NextFunction) => {
+        User.findByIdAndDelete(req.user!.sub)
+            .then(_ => res.status(204).end())
+            .catch(error => next(error));
+    }
+);
+
 router.patch(
     "/password/",
     expressJwtAuthentication({}),
@@ -110,6 +120,6 @@ router.patch(
 
         res.status(204).json();
     }
-)
+);
 
 export default router;
