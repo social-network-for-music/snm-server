@@ -10,9 +10,17 @@ import expressJwtAuthentication from "express-jwt-authentication";
 
 import validateWithSchema from "./middlewares/validateWithSchema";
 
-import { ForbiddenError, NotFoundError } from "../errors";
+import Spotify from "../spotify";
+
+import { BadRequestError, ForbiddenError, NotFoundError } from "../errors";
 
 import Playlist from "../models/Playlist";
+
+const SDK = new Spotify({
+    clientId: process.env.SPOTIFY_CLIENT_ID!,
+
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET!
+});
 
 const router = express.Router();
 
@@ -44,6 +52,7 @@ router.get(
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
         Playlist.find({ owner: req.user!.sub })
+            .populate("owner", "-email -artists -genres")
             .then(playlists => res.json(playlists))
             .catch(error => next(error));
     }
@@ -131,6 +140,45 @@ router.delete(
         Playlist.findByIdAndDelete(_id)
             .then(_ => res.status(204).end())
             .catch(error => next(error));
+    }
+);
+
+router.patch(
+    "/:id/add/:track/",
+    expressJwtAuthentication({}),
+    validateWithSchema({
+        params: z.object({
+            id: z.string()
+                .regex(/^[0-9a-fA-F]{24}$/,
+                    "You must provide a valid playlist ID."),
+
+            track: z.string()
+                .refine((id) => new Promise((resolve, reject) => {
+                    SDK.track(id)
+                        .then(_ => resolve(true))
+                        .catch(error => {
+                            if (error.response?.status == 400 ||
+                                    error.response?.status == 404)
+                                return resolve(false);
+
+                            reject(error);
+                        });
+                }))
+        })
+    }),
+    requirePlaylist({ owner: true }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const playlist = await Playlist.findById(req.params.id);
+
+        if (playlist!.tracks.includes(req.params.track))
+            return next(new BadRequestError(
+                "This track is already in your playlist."));
+
+        playlist!.tracks.push(req.params.track);
+
+        await playlist!.save();
+
+        res.json(playlist);
     }
 );
 

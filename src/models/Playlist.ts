@@ -30,6 +30,11 @@ const schema = new mongoose.Schema({
         type: Boolean,
 
         required: true
+    },
+    tracks: {
+        type: [String],
+        default: [],
+        required: true
     }
 });
 

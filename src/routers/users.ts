@@ -86,7 +86,7 @@ router.patch(
                                     return resolve(false);
 
                                 reject(error);
-                            })
+                            });
                     }))
             ),
 
