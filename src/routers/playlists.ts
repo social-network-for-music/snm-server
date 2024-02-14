@@ -100,4 +100,33 @@ router.patch(
     }
 );
 
+router.delete(
+    "/:id/",
+    expressJwtAuthentication({}),
+    validateWithSchema({
+        params: z.object({
+            id: z.string()
+                .regex(/^[0-9a-fA-F]{24}$/,
+                    "You must provide a valid playlist ID.")
+        })
+    }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const _id = req.params.id;
+
+        const playlist = await Playlist.findById(_id);
+
+        if (!playlist)
+            return next(new NotFoundError(
+                `No playlist found with ID: ${_id}.`));
+
+        if (req.user!.sub != playlist.owner.toString())
+            return next(new ForbiddenError(
+                "You are not the owner of this playlist!"));
+
+        playlist.deleteOne()
+            .then(_ => res.status(204).end())
+            .catch(error => next(error));
+    }
+);
+
 export default router;
