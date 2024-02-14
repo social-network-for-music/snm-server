@@ -71,12 +71,16 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         const user = await User.findById(req.user!.sub);
 
+        if (user!.artists.length + user!.genres.length > 5)
+            return next(new BadRequestError("Spotify doesn't support recommendations " +
+                "for users with more than 5 favorite artists and genres."));
+
         SDK.recommendations(user!.artists, user!.genres)
             .then(tracks => res.json(tracks))
             .catch(error => {
                 if (error.response?.status == 400)
                     return next(new BadRequestError(
-                        "You must first set your favorite artists and genres."));
+                        "You don't have any favorite artist or genre."));
 
                 next(error);
             });

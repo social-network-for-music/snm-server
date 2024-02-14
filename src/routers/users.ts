@@ -12,9 +12,17 @@ import expressJwtAuthentication from "express-jwt-authentication";
 
 import validateWithSchema from "./middlewares/validateWithSchema";
 
-import User from "../models/User";
+import Spotify from "../spotify";
 
 import { BadRequestError } from "../errors";
+
+import User from "../models/User";
+
+const SDK = new Spotify({
+    clientId: process.env.SPOTIFY_CLIENT_ID!,
+
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET!
+});
 
 const router = express.Router();
 
@@ -66,17 +74,32 @@ router.patch(
             username: z.string()
                 .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
                     "You must provide a valid username."),
+
+            artists: z.array(
+                z.string()
+                    .refine((id) => new Promise((resolve, reject) => {
+                        SDK.artist(id)
+                            .then(_ => resolve(true))
+                            .catch(error => {
+                                if (error.response?.status == 400 ||
+                                        error.response?.status == 404)
+                                    return resolve(false);
+
+                                reject(error);
+                            })
+                    }))
+            ),
+
+            genres: z.array(
+                z.string()
+            )
         })
+            .partial()
+            .strict()
     }),
     async (req: Request, res: Response, next: NextFunction) => {
-        const { username } = req.body;
-
-        const user = await User.findById(req.user!.sub);
-            
-        user!.username = username;
-
-        user!.save()
-            .then(data => res.json(data))
+        User.findByIdAndUpdate(req.user!.sub, req.body, { new: true })
+            .then(user => res.json(user))
             .catch(error => next(error));
     }
 );
