@@ -16,6 +16,23 @@ import Playlist from "../models/Playlist";
 
 const router = express.Router();
 
+function requirePlaylist(options: { public?: boolean }): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+    return async (req: Request, _: Response, next: NextFunction): Promise<void> => {
+        const playlist = await Playlist.findOne({
+            _id: req.params.id,
+
+            public: options.public ??
+                { $exists: true }
+        });
+
+        if (!playlist)
+            return next(new NotFoundError(
+                `No playlist found with ID: ${req.params.id}.`));
+
+        next();
+    };
+}
+
 router.get(
     "/",
     expressJwtAuthentication({}),
@@ -81,16 +98,13 @@ router.patch(
             .partial()
             .strict()
     }),
+    requirePlaylist({}),
     async (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
 
         const playlist = await Playlist.findById(_id);
 
-        if (!playlist)
-            return next(new NotFoundError(
-                `No playlist found with ID: ${_id}.`));
-
-        if (req.user!.sub != playlist.owner.toString())
+        if (req.user!.sub != playlist!.owner.toString())
             return next(new ForbiddenError(
                 "You are not the owner of this playlist!"));
 
@@ -110,20 +124,17 @@ router.delete(
                     "You must provide a valid playlist ID.")
         })
     }),
+    requirePlaylist({}),
     async (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
 
         const playlist = await Playlist.findById(_id);
 
-        if (!playlist)
-            return next(new NotFoundError(
-                `No playlist found with ID: ${_id}.`));
-
-        if (req.user!.sub != playlist.owner.toString())
+        if (req.user!.sub != playlist!.owner.toString())
             return next(new ForbiddenError(
                 "You are not the owner of this playlist!"));
 
-        playlist.deleteOne()
+        playlist!.deleteOne()
             .then(_ => res.status(204).end())
             .catch(error => next(error));
     }
