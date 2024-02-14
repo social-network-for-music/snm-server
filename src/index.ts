@@ -10,6 +10,7 @@ import "dotenv/config";
 
 import auth from "./routers/auth";
 import users from "./routers/users";
+import playlists from "./routers/playlists";
 import spotify from "./routers/spotify";
 
 import { HttpError } from "./errors";
@@ -22,6 +23,7 @@ app.use(express.json());
 
 app.use("/api/auth", auth);
 app.use("/api/users", users);
+app.use("/api/playlists", playlists);
 app.use("/api/spotify", spotify);
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
