@@ -99,6 +99,7 @@ router.post(
 router.patch(
     "/:id/",
     expressJwtAuthentication({}),
+    requirePlaylist({ owner: true }),
     validateWithSchema({
         body: z.object({
             title: z.string()
@@ -116,7 +117,6 @@ router.patch(
             .partial()
             .strict()
     }),
-    requirePlaylist({ owner: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
 
@@ -142,6 +142,7 @@ router.delete(
 router.patch(
     "/:id/add/:track/",
     expressJwtAuthentication({}),
+    requirePlaylist({ owner: true }),
     validateWithSchema({
         params: z.object({
             track: z.string()
@@ -158,7 +159,6 @@ router.patch(
                 }))
         })
     }),
-    requirePlaylist({ owner: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         const playlist = await Playlist.findById(req.params.id);
 
@@ -177,12 +177,12 @@ router.patch(
 router.patch(
     "/:id/remove/:track/",
     expressJwtAuthentication({}),
+    requirePlaylist({ owner: true }),
     validateWithSchema({
         params: z.object({
             track: z.string()
         })
     }),
-    requirePlaylist({ owner: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         const playlist = await Playlist.findById(req.params.id);
 
