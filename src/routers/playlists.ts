@@ -16,7 +16,8 @@ import Playlist from "../models/Playlist";
 
 const router = express.Router();
 
-function requirePlaylist(options: { public?: boolean }): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+function requirePlaylist(options: { public?: boolean, owner?: boolean }): 
+        (req: Request, res: Response, next: NextFunction) => Promise<void> {
     return async (req: Request, _: Response, next: NextFunction): Promise<void> => {
         const playlist = await Playlist.findOne({
             _id: req.params.id,
@@ -28,6 +29,11 @@ function requirePlaylist(options: { public?: boolean }): (req: Request, res: Res
         if (!playlist)
             return next(new NotFoundError(
                 `No playlist found with ID: ${req.params.id}.`));
+
+        if (options.owner)
+            if (req.user!.sub != playlist.owner.toString())
+                return next(new ForbiddenError(
+                    "You are not the owner of this playlist!"));
 
         next();
     };
@@ -98,15 +104,9 @@ router.patch(
             .partial()
             .strict()
     }),
-    requirePlaylist({}),
+    requirePlaylist({ owner: true }),
     async (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
-
-        const playlist = await Playlist.findById(_id);
-
-        if (req.user!.sub != playlist!.owner.toString())
-            return next(new ForbiddenError(
-                "You are not the owner of this playlist!"));
 
         Playlist.findByIdAndUpdate(_id, req.body, { new: true })
             .then(playlist => res.json(playlist))
@@ -124,17 +124,11 @@ router.delete(
                     "You must provide a valid playlist ID.")
         })
     }),
-    requirePlaylist({}),
-    async (req: Request, res: Response, next: NextFunction) => {
+    requirePlaylist({ owner: true }),
+    (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
 
-        const playlist = await Playlist.findById(_id);
-
-        if (req.user!.sub != playlist!.owner.toString())
-            return next(new ForbiddenError(
-                "You are not the owner of this playlist!"));
-
-        playlist!.deleteOne()
+        Playlist.findByIdAndDelete(_id)
             .then(_ => res.status(204).end())
             .catch(error => next(error));
     }
