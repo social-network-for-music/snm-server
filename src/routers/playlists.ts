@@ -16,6 +16,16 @@ import Playlist from "../models/Playlist";
 
 const router = express.Router();
 
+router.get(
+    "/",
+    expressJwtAuthentication({}),
+    (req: Request, res: Response, next: NextFunction) => {
+        Playlist.find({ owner: req.user!.sub })
+            .then(playlists => res.json(playlists))
+            .catch(error => next(error));
+    }
+);
+
 router.post(
     "/",
     expressJwtAuthentication({}),
