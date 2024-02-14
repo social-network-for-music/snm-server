@@ -10,7 +10,7 @@ import expressJwtAuthentication from "express-jwt-authentication";
 
 import validateWithSchema from "./middlewares/validateWithSchema";
 
-import User from "../models/User";
+import { ForbiddenError, NotFoundError } from "../errors";
 
 import Playlist from "../models/Playlist";
 
@@ -51,6 +51,51 @@ router.post(
 
         playlist.save()
             .then(data => res.status(201).json(data))
+            .catch(error => next(error));
+    }
+);
+
+router.patch(
+    "/:id/",
+    expressJwtAuthentication({}),
+    validateWithSchema({
+        params: z.object({
+            id: z.string()
+                .regex(/^[0-9a-fA-F]{24}$/,
+                    "You must provide a valid playlist ID.")
+        }),
+
+        body: z.object({
+            title: z.string()
+                .regex(/^[\w\s\-.,!?:]{3,25}$/,
+                    "You must provide a valid title."),
+
+            description: z.string()
+                .nullable(),
+            
+            tags: z.array(
+                z.string()
+                    .regex(/^[a-zA-Z_]{3,12}$/)
+            )
+        })
+            .partial()
+            .strict()
+    }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const _id = req.params.id;
+
+        const playlist = await Playlist.findById(_id);
+
+        if (!playlist)
+            return next(new NotFoundError(
+                `No playlist found with ID: ${_id}.`));
+
+        if (req.user!.sub != playlist.owner.toString())
+            return next(new ForbiddenError(
+                "You are not the owner of this playlist!"));
+
+        Playlist.findByIdAndUpdate(_id, req.body, { new: true })
+            .then(playlist => res.json(playlist))
             .catch(error => next(error));
     }
 );
