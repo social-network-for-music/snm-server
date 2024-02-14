@@ -25,26 +25,35 @@ const SDK = new Spotify({
 const router = express.Router();
 
 function requirePlaylist(options: { public?: boolean, owner?: boolean }): 
-        (req: Request, res: Response, next: NextFunction) => Promise<void> {
-    return async (req: Request, _: Response, next: NextFunction): Promise<void> => {
-        const playlist = await Playlist.findOne({
-            _id: req.params.id,
+        ((req: Request, res: Response, next: NextFunction) => Promise<void>)[] {
+    return [
+        validateWithSchema({
+            params: z.object({
+                id: z.string()
+                    .regex(/^[0-9a-fA-F]{24}$/,
+                        "You must provide a valid playlist ID.")
+            })
+        }),
+        async (req: Request, _: Response, next: NextFunction): Promise<void> => {
+            const playlist = await Playlist.findOne({
+                _id: req.params.id,
 
-            public: options.public ??
-                { $exists: true }
-        });
+                public: options.public ??
+                    { $exists: true }
+            });
 
-        if (!playlist)
-            return next(new NotFoundError(
-                `No playlist found with ID: ${req.params.id}.`));
+            if (!playlist)
+                return next(new NotFoundError(
+                    `No playlist found with ID: ${req.params.id}.`));
 
-        if (options.owner)
-            if (req.user!.sub != playlist.owner.toString())
-                return next(new ForbiddenError(
-                    "You are not the owner of this playlist!"));
+            if (options.owner)
+                if (req.user!.sub != playlist.owner.toString())
+                    return next(new ForbiddenError(
+                        "You are not the owner of this playlist!"));
 
-        next();
-    };
+            next();
+        }
+    ];
 }
 
 router.get(
@@ -91,12 +100,6 @@ router.patch(
     "/:id/",
     expressJwtAuthentication({}),
     validateWithSchema({
-        params: z.object({
-            id: z.string()
-                .regex(/^[0-9a-fA-F]{24}$/,
-                    "You must provide a valid playlist ID.")
-        }),
-
         body: z.object({
             title: z.string()
                 .regex(/^[\w\s\-.,!?:]{3,25}$/,
@@ -126,13 +129,6 @@ router.patch(
 router.delete(
     "/:id/",
     expressJwtAuthentication({}),
-    validateWithSchema({
-        params: z.object({
-            id: z.string()
-                .regex(/^[0-9a-fA-F]{24}$/,
-                    "You must provide a valid playlist ID.")
-        })
-    }),
     requirePlaylist({ owner: true }),
     (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
@@ -148,10 +144,6 @@ router.patch(
     expressJwtAuthentication({}),
     validateWithSchema({
         params: z.object({
-            id: z.string()
-                .regex(/^[0-9a-fA-F]{24}$/,
-                    "You must provide a valid playlist ID."),
-
             track: z.string()
                 .refine((id) => new Promise((resolve, reject) => {
                     SDK.track(id)
