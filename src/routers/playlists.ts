@@ -174,4 +174,29 @@ router.patch(
     }
 );
 
+router.patch(
+    "/:id/remove/:track/",
+    expressJwtAuthentication({}),
+    validateWithSchema({
+        params: z.object({
+            track: z.string()
+        })
+    }),
+    requirePlaylist({ owner: true }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const playlist = await Playlist.findById(req.params.id);
+
+        if (!playlist!.tracks.includes(req.params.track))
+            return next(new BadRequestError(
+                "This track is not in your playlist."));
+
+        playlist!.tracks = playlist!.tracks.filter(
+            track => track != req.params.track);
+
+        await playlist!.save();
+
+        res.json(playlist);
+    }
+);
+
 export default router;
