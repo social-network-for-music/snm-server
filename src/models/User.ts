@@ -23,19 +23,20 @@ const schema = new mongoose.Schema({
     },
     artists: {
         type: [String],
-
-        default: []
+        default: [],
+        required: true
     },
     genres: {
         type: [String],
-        
-        default: []
+        default: [],
+        required: true
     }
 });
 
 schema.set("toJSON", {
     transform: (_, object) => {
       delete object.__v;
+      
       delete object.hash;
     }
 });
