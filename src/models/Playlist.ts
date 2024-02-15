@@ -35,6 +35,15 @@ const schema = new mongoose.Schema({
         type: [String],
         default: [],
         required: true
+    },
+    followers: {
+        type: [{
+            type: mongoose.Schema.ObjectId,
+
+            ref: "User"
+        }],
+        default: [],
+        required: true
     }
 });
 
