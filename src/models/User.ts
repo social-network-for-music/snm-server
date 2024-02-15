@@ -1,9 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 mongoose.connect(process.env.MONGODB_URI || 
     "mongodb://127.0.0.1:27017/snm");
 
-const schema = new mongoose.Schema({
+export interface IUser {
+    _id: Schema.Types.ObjectId;
+    email: string;
+    username: string;
+    hash: string;
+    artists: mongoose.Types.Array<string>;
+    genres: mongoose.Types.Array<string>;
+}
+
+const schema = new Schema<IUser>({
     email: {
         type: String,
         match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,

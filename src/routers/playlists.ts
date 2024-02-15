@@ -16,7 +16,7 @@ import Spotify from "../spotify";
 
 import { BadRequestError, ForbiddenError, NotFoundError } from "../errors";
 
-import Playlist from "../models/Playlist";
+import Playlist, { IPlaylist } from "../models/Playlist";
 
 const SDK = new Spotify({
     clientId: process.env.SPOTIFY_CLIENT_ID!,
@@ -70,13 +70,13 @@ router.get(
     (req: Request, res: Response, next: NextFunction) => {
         const select = req.query.select || "all";
 
-        const filter: FilterQuery<typeof Playlist> = { $or: [ ] };
+        const filter: FilterQuery<IPlaylist> = { $or: [ ] };
 
         if (select == "owner" || select == "all")
-            filter["$or"]!.push({ owner: req.user!.sub });
+            filter.$or!.push({ owner: req.user!.sub });
 
         if (select == "follower" || select == "all")
-            filter["$or"]!.push({ followers: req.user!.sub });
+            filter.$or!.push({ followers: req.user!.sub });
 
         Playlist.find(filter)
             .populate("owner", "-email -artists -genres")

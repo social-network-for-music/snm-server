@@ -1,11 +1,24 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+
+import { IUser } from "./User";
 
 mongoose.connect(process.env.MONGODB_URI || 
     "mongodb://127.0.0.1:27017/snm");
 
-const schema = new mongoose.Schema({
+export interface IPlaylist {
+    _id: Schema.Types.ObjectId;
+    owner: Schema.Types.ObjectId;
+    title: string;
+    description?: string;
+    public: boolean;
+    tags: mongoose.Types.Array<string>;
+    tracks: mongoose.Types.Array<string>;
+    followers: mongoose.Types.DocumentArray<IUser>;
+}
+
+const schema = new Schema<IPlaylist>({
     owner: {
-        type: mongoose.Schema.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
@@ -17,6 +30,11 @@ const schema = new mongoose.Schema({
     description: {
         type: String
     },
+    public: {
+        type: Boolean,
+
+        required: true
+    },
     tags: {
         type: [{
             type: String,
@@ -26,11 +44,6 @@ const schema = new mongoose.Schema({
         default: [],
         required: true
     },
-    public: {
-        type: Boolean,
-
-        required: true
-    },
     tracks: {
         type: [String],
         default: [],
@@ -38,7 +51,7 @@ const schema = new mongoose.Schema({
     },
     followers: {
         type: [{
-            type: mongoose.Schema.ObjectId,
+            type: Schema.Types.ObjectId,
 
             ref: "User"
         }],
