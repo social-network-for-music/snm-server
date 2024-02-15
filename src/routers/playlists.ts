@@ -159,18 +159,18 @@ router.patch(
                 }))
         })
     }),
-    async (req: Request, res: Response, next: NextFunction) => {
-        const playlist = await Playlist.findById(req.params.id);
+    (req: Request, res: Response, next: NextFunction) => {
+        const _id = req.params.id;
 
-        if (playlist!.tracks.includes(req.params.track))
-            return next(new BadRequestError(
-                "This track is already in your playlist."));
+        const update = { 
+            $addToSet: { 
+                tracks: req.params.track 
+            } 
+        };
 
-        playlist!.tracks.push(req.params.track);
-
-        await playlist!.save();
-
-        res.json(playlist);
+        Playlist.findByIdAndUpdate(_id, update, { new: true })
+            .then(playlist => res.json(playlist))
+            .catch(error => next(error));
     }
 );
 
@@ -184,18 +184,17 @@ router.patch(
         })
     }),
     async (req: Request, res: Response, next: NextFunction) => {
-        const playlist = await Playlist.findById(req.params.id);
+        const _id = req.params.id;
 
-        if (!playlist!.tracks.includes(req.params.track))
-            return next(new BadRequestError(
-                "This track is not in your playlist."));
+        const update = { 
+            $pull: { 
+                tracks: req.params.track 
+            } 
+        };
 
-        playlist!.tracks = playlist!.tracks.filter(
-            track => track != req.params.track);
-
-        await playlist!.save();
-
-        res.json(playlist);
+        Playlist.findByIdAndUpdate(_id, update, { new: true })
+            .then(playlist => res.json(playlist))
+            .catch(error => next(error));
     }
 );
 
