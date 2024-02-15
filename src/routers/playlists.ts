@@ -223,4 +223,29 @@ router.patch(
     }
 );
 
+router.patch(
+    "/:id/unfollow/",
+    expressJwtAuthentication({}),
+    requirePlaylist({ public: true }),
+    async (req: Request, res: Response, next: NextFunction) => {
+        const _id = req.params.id;
+
+        const playlist = await Playlist.findById(_id);
+
+        if (req.user!.sub == playlist!.owner.toString())
+            return next(new BadRequestError(
+                "You can't unfollow your own playlists!"));
+
+        const update = { 
+            $pull: { 
+                followers: req.user!.sub
+            } 
+        };
+
+        Playlist.findByIdAndUpdate(_id, update, { new: true })
+            .then(playlist => res.json(playlist))
+            .catch(error => next(error));
+    }
+);
+
 export default router;
