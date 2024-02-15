@@ -4,6 +4,8 @@ import express, {
     Response
 } from "express";
 
+import { FilterQuery } from "mongoose";
+
 import z from "zod";
 
 import expressJwtAuthentication from "express-jwt-authentication";
@@ -59,8 +61,24 @@ function requirePlaylist(options: { public?: boolean, owner?: boolean }):
 router.get(
     "/",
     expressJwtAuthentication({}),
+    validateWithSchema({
+        query: z.object({
+            select: z.enum([ "all", "owner", "follower" ])
+                .optional()
+        })
+    }),
     (req: Request, res: Response, next: NextFunction) => {
-        Playlist.find({ owner: req.user!.sub })
+        const select = req.query.select || "all";
+
+        const filter: FilterQuery<typeof Playlist> = { $or: [ ] };
+
+        if (select == "owner" || select == "all")
+            filter["$or"]!.push({ owner: req.user!.sub });
+
+        if (select == "follower" || select == "all")
+            filter["$or"]!.push({ followers: req.user!.sub });
+
+        Playlist.find(filter)
             .populate("owner", "-email -artists -genres")
             .then(playlists => res.json(playlists))
             .catch(error => next(error));
