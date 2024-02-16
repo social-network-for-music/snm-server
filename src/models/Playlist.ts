@@ -22,8 +22,10 @@ export interface IPlaylist {
     description?: string;
     public: boolean;
     tags: mongoose.Types.Array<string>;
-    tracks: mongoose.Types.Array<Schema.Types.Mixed>;
+    tracks: mongoose.Types.Array<any>;
     followers: mongoose.Types.DocumentArray<IUser>;
+
+    thumbnail: () => IThumbnail;
 }
 
 export interface IPlaylistPreview {
@@ -34,6 +36,12 @@ export interface IPlaylistPreview {
     tags: mongoose.Types.Array<string>;
     totalTracks: number;
     totalFollowers: number;
+}
+
+export interface IThumbnail {
+    sizes: {
+        [size: number]: string[];
+    }
 }
 
 export interface PlaylistModel extends Model<IPlaylist> {
@@ -69,7 +77,7 @@ const schema = new Schema<IPlaylist, PlaylistModel>({
         required: true
     },
     tracks: {
-        type: [Schema.Types.Mixed],
+        type: [Object],
         default: [],
         required: true
     },
@@ -97,6 +105,23 @@ schema.static("getPreviews",
         });
     }
 );
+
+schema.method("thumbnail", function(): IThumbnail {
+    const thumbnail: IThumbnail = { 
+        sizes: { } 
+    };
+
+    for (const size of [64, 300, 640])
+        thumbnail.sizes[size] = this.tracks.map(track => {
+            const image = track.album.images.find(
+                (image: any) => image.width == size);
+
+            return image.url;
+        })
+            .slice(0, 4);
+
+    return thumbnail;
+});
 
 schema.set("toJSON", {
     transform: (_, ret) => {

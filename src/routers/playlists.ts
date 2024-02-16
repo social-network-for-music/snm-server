@@ -14,7 +14,11 @@ import validateWithSchema from "./middlewares/validateWithSchema";
 
 import Spotify from "../spotify";
 
-import { BadRequestError, ForbiddenError, NotFoundError } from "../errors";
+import { 
+    BadRequestError,
+    ForbiddenError,
+    NotFoundError 
+} from "../errors";
 
 import Playlist, { IPlaylist } from "../models/Playlist";
 
@@ -165,7 +169,20 @@ router.get(
 
         Playlist.findById(_id)
             .then(playlist => res.json(playlist))
-            .catch(error => next(error));
+    }
+);
+
+router.get(
+    "/:id/thumbnail/",
+    expressJwtAuthentication({}),
+    requireAccess(),
+    (req: Request, res: Response, next: NextFunction) => {
+        const _id = req.params.id;
+
+        Playlist.findById(_id)
+            .then(playlist => {
+                res.json(playlist!.thumbnail());
+            });
     }
 );
 
