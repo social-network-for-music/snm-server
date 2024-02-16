@@ -73,8 +73,12 @@ router.get(
         const { title, track, tag } = req.query;
 
         const filter: FilterQuery<IPlaylist> = {
+            public: true,
+
             ...title ? { title: { $regex: title, $options: "i" } } : { },
+            
             ...track ? { tracks: { $elemMatch: { name: { $regex: track, $options: "i" } } } } : { },
+            
             ...tag ? { tags: tag } : { },
         };
 
@@ -110,6 +114,32 @@ router.get(
             .select("-description -tracks -followers")
             .populate("owner", "-email -artists -genres")
             .then(playlists => res.json(playlists))
+            .catch(error => next(error));
+    }
+);
+
+router.get(
+    "/:id/",
+    expressJwtAuthentication({}),
+    requirePlaylist({}),
+    (req: Request, res: Response, next: NextFunction) => {
+        const filter: FilterQuery<IPlaylist> = {
+            _id: req.params.id,
+
+            $or: [
+                { owner: req.user!.sub },
+                { public: true }
+            ]
+        };
+
+        Playlist.findOne(filter)
+            .then(playlist => {
+                if (!playlist)
+                    return next(new ForbiddenError(
+                        "You can't access private playlists!"));
+
+                res.json(playlist);
+            })
             .catch(error => next(error));
     }
 );
