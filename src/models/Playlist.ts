@@ -39,7 +39,7 @@ const schema = new Schema<IPlaylist>({
         type: [{
             type: String,
 
-            match: /^[\w\- ]{3,18}$/
+            match: /^[a-z0\- ]{3,18}$/
         }],
         default: [],
         required: true

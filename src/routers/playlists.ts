@@ -59,6 +59,34 @@ function requirePlaylist(options: { public?: boolean, owner?: boolean }):
 }
 
 router.get(
+    "/search/",
+    expressJwtAuthentication({}),
+    validateWithSchema({
+        query: z.object({
+            title: z.string(),
+            track: z.string(),
+            tag: z.string()
+        })
+            .partial()
+    }),
+    (req: Request, res: Response, next: NextFunction) => {
+        const { title, track, tag } = req.query;
+
+        const filter: FilterQuery<IPlaylist> = {
+            ...title ? { title: { $regex: title, $options: "i" } } : { },
+            ...track ? { tracks: { $elemMatch: { name: { $regex: track, $options: "i" } } } } : { },
+            ...tag ? { tags: tag } : { },
+        };
+
+        Playlist.find(filter)
+            .select("-description -tracks -followers")
+            .populate("owner", "-email -artists -genres")
+            .then(playlists => res.json(playlists))
+            .catch(error => next(error));
+    }
+);
+
+router.get(
     "/",
     expressJwtAuthentication({}),
     validateWithSchema({
@@ -130,7 +158,7 @@ router.patch(
             
             tags: z.array(
                 z.string()
-                    .regex(/^[\w\- ]{3,18}$/)
+                    .regex(/^[a-z0\- ]{3,18}$/)
             )
         })
             .partial()
