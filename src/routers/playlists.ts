@@ -79,6 +79,7 @@ router.get(
             filter.$or!.push({ followers: req.user!.sub });
 
         Playlist.find(filter)
+            .select("-description -tracks -followers")
             .populate("owner", "-email -artists -genres")
             .then(playlists => res.json(playlists))
             .catch(error => next(error));
@@ -164,31 +165,34 @@ router.patch(
     validateWithSchema({
         params: z.object({
             track: z.string()
-                .refine((id) => new Promise((resolve, reject) => {
-                    SDK.track(id)
-                        .then(_ => resolve(true))
-                        .catch(error => {
-                            if (error.response?.status == 400 ||
-                                    error.response?.status == 404)
-                                return resolve(false);
-
-                            reject(error);
-                        });
-                }))
         })
     }),
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            var track = await SDK.track(req.params.track);          
+        } catch (error: any) {
+            if (error.response?.status == 400)
+                return next(new BadRequestError(
+                    "You must provide a valid ID."));
+
+            if (error.response?.status == 404)
+                return next(new NotFoundError(
+                    "No track found with the given ID."));
+
+            return next(error);
+        }
+
         const _id = req.params.id;
 
         const update = { 
             $addToSet: { 
-                tracks: req.params.track 
+                tracks: track
             } 
         };
 
         Playlist.findByIdAndUpdate(_id, update, { new: true })
             .then(playlist => res.json(playlist))
-            .catch(error => next(error));
+            .catch(error => next(error)); 
     }
 );
 
@@ -201,12 +205,14 @@ router.patch(
             track: z.string()
         })
     }),
-    async (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response, next: NextFunction) => {
         const _id = req.params.id;
 
         const update = { 
             $pull: { 
-                tracks: req.params.track 
+                tracks: { 
+                    id: req.params.track 
+                }
             } 
         };
 

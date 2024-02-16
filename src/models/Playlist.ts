@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 import { IUser } from "./User";
 
-mongoose.connect(process.env.MONGODB_URI || 
+mongoose.connect(process.env.MONGODB_URI ||
     "mongodb://127.0.0.1:27017/snm");
 
 export interface IPlaylist {
@@ -12,7 +12,7 @@ export interface IPlaylist {
     description?: string;
     public: boolean;
     tags: mongoose.Types.Array<string>;
-    tracks: mongoose.Types.Array<string>;
+    tracks: mongoose.Types.Array<Schema.Types.Mixed>;
     followers: mongoose.Types.DocumentArray<IUser>;
 }
 
@@ -45,7 +45,7 @@ const schema = new Schema<IPlaylist>({
         required: true
     },
     tracks: {
-        type: [String],
+        type: [Schema.Types.Mixed],
         default: [],
         required: true
     },
@@ -62,7 +62,7 @@ const schema = new Schema<IPlaylist>({
 
 schema.set("toJSON", {
     transform: (_, object) => {
-      delete object.__v;
+        delete object.__v;
     }
 });
 

@@ -100,7 +100,7 @@ router.get(
 
                 if (error.response?.status == 404)
                     return next(new NotFoundError(
-                        "Can't find a track with the given ID."));
+                        "No track found with the given ID."));
 
                 next(error);
             });
@@ -120,7 +120,7 @@ router.get(
 
                 if (error.response?.status == 404)
                     return next(new NotFoundError(
-                        "Can't find an artist with the given ID."));
+                        "No artist found with the given ID."));
 
                 next(error);
             });
