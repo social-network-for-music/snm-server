@@ -1,9 +1,19 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { 
+    Schema,
+    FilterQuery,
+    Model,
+    model,
+    HydratedDocument,
+    Query
+} from "mongoose";
 
 import { IUser } from "./User";
 
-mongoose.connect(process.env.MONGODB_URI ||
-    "mongodb://127.0.0.1:27017/snm");
+type _Query<T> = Query<
+    HydratedDocument<T>[],
+
+    HydratedDocument<T>
+>;
 
 export interface IPlaylist {
     _id: Schema.Types.ObjectId;
@@ -16,7 +26,21 @@ export interface IPlaylist {
     followers: mongoose.Types.DocumentArray<IUser>;
 }
 
-const schema = new Schema<IPlaylist>({
+export interface IPlaylistPreview {
+    _id: Schema.Types.ObjectId;
+    owner: Schema.Types.ObjectId;
+    title: string;
+    public: boolean;
+    tags: mongoose.Types.Array<string>;
+    totalTracks: number;
+    totalFollowers: number;
+}
+
+export interface PlaylistModel extends Model<IPlaylist> {
+    getPreviews(filter: FilterQuery<IPlaylist>): _Query<IPlaylistPreview>;
+}
+
+const schema = new Schema<IPlaylist, PlaylistModel>({
     owner: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -60,12 +84,26 @@ const schema = new Schema<IPlaylist>({
     }
 });
 
+schema.static("getPreviews", 
+    function (filter: FilterQuery<IPlaylist>): _Query<IPlaylistPreview> {
+        return this.find(filter, {
+            _id: 1,
+            owner: 1,
+            title: 1,
+            public: 1,
+            tags: 1,
+            totalTracks: { $size: "$tracks" },
+            totalFollowers: { $size: "$followers" }
+        });
+    }
+);
+
 schema.set("toJSON", {
-    transform: (_, object) => {
-        delete object.__v;
+    transform: (_, ret) => {
+        delete ret.__v;
     }
 });
 
-const Playlist = mongoose.model("Playlist", schema);
+const Playlist = model<IPlaylist, PlaylistModel>("Playlist", schema);
 
 export default Playlist;

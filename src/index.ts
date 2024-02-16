@@ -4,6 +4,8 @@ import express, {
     Response
 } from "express";
 
+import mongoose from "mongoose";
+
 import { ZodError } from "zod";
 
 import "dotenv/config";
@@ -87,5 +89,8 @@ app.get("/api/ping", (_: Request, res: Response) => {
 })
 
 app.listen(port, () => {
+    mongoose.connect(process.env.MONGODB_URI ||
+        "mongodb://127.0.0.1:27017/snm");
+
     console.log(`SNM's server is now online on port ${port}.`);
 });

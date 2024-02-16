@@ -1,7 +1,7 @@
-import mongoose, { Schema } from "mongoose";
-
-mongoose.connect(process.env.MONGODB_URI || 
-    "mongodb://127.0.0.1:27017/snm");
+import mongoose, { 
+    Schema,
+    model
+} from "mongoose";
 
 export interface IUser {
     _id: Schema.Types.ObjectId;
@@ -43,13 +43,13 @@ const schema = new Schema<IUser>({
 });
 
 schema.set("toJSON", {
-    transform: (_, object) => {
-      delete object.__v;
+    transform: (_, ret) => {
+      delete ret.__v;
       
-      delete object.hash;
+      delete ret.hash;
     }
 });
 
-const User = mongoose.model("User", schema);
+const User = model<IUser>("User", schema);
 
 export default User;
