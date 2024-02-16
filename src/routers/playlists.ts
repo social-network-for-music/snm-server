@@ -91,7 +91,7 @@ router.post(
     validateWithSchema({
         body: z.object({
             title: z.string()
-                .regex(/^[\w\s\-.,!?:]{3,25}$/,
+                .regex(/^[\w\-.,!?: ]{3,30}$/,
                     "You must provide a valid title."),
 
             description: z.string()
@@ -121,7 +121,7 @@ router.patch(
     validateWithSchema({
         body: z.object({
             title: z.string()
-                .regex(/^[\w\s\-.,!?:]{3,25}$/,
+                .regex(/^[\w\-.,!?: ]{3,30}$/,
                     "You must provide a valid title."),
 
             description: z.string()
@@ -129,7 +129,7 @@ router.patch(
             
             tags: z.array(
                 z.string()
-                    .regex(/^[a-zA-Z_]{3,12}$/)
+                    .regex(/^[\w\- ]{3,18}$/)
             )
         })
             .partial()

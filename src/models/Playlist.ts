@@ -24,7 +24,7 @@ const schema = new Schema<IPlaylist>({
     },
     title: {
         type: String,
-        match: /^[\w\s\-.,!?:]{3,25}$/,
+        match: /^[\w\-.,!?: ]{3,30}$/,
         required: true
     },
     description: {
@@ -39,7 +39,7 @@ const schema = new Schema<IPlaylist>({
         type: [{
             type: String,
 
-            match: /^[a-zA-Z_]{3,12}$/
+            match: /^[\w\- ]{3,18}$/
         }],
         default: [],
         required: true
