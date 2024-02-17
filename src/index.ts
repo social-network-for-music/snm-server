@@ -6,6 +6,8 @@ import express, {
 
 import mongoose from "mongoose";
 
+import cors from "cors";
+
 import { ZodError } from "zod";
 
 import "dotenv/config";
@@ -20,6 +22,8 @@ import { HttpError } from "./errors";
 const app = express();
 
 const port = process.env.PORT || 3500;
+
+app.use(cors());
 
 app.use(express.json());
 
