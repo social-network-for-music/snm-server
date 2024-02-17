@@ -10,6 +10,8 @@ import bcrypt from "bcryptjs";
 
 import jwt from "jsonwebtoken";
 
+import expressJwtAuthentication from "express-jwt-authentication";
+
 import validateWithSchema from "./middlewares/validateWithSchema";
 
 import User from "../models/User";
@@ -44,6 +46,14 @@ router.post(
         });
 
         return res.json({ token });
+    }
+);
+
+router.head(
+    "/verify/",
+    expressJwtAuthentication({}),
+    (req: Request, res: Response, next: NextFunction) => {
+        res.status(204).end();
     }
 );
 
