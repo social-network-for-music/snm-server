@@ -21,15 +21,17 @@ const SECRET = process.env.EXPRESS_JWT_AUTHENTICATION_SECRET!;
 const router = express.Router();
 
 router.post(
-    "/login",
+    "/login/",
     validateWithSchema({
         body: z.object({
             email: z.string(),
-            password: z.string()
+            password: z.string(),
+            rememberMe: z.boolean()
+                .optional()
         })
     }),
     async (req: Request, res: Response, next: NextFunction) => {
-        const { email, password } = req.body;
+        const { email, password, rememberMe } = req.body;
 
         const user = await User.findOne({ email });
 
@@ -38,7 +40,7 @@ router.post(
                 "No user found with the given credentials."));
 
         const token = jwt.sign({ sub: user._id }, SECRET, {
-            expiresIn: "2h"
+            expiresIn: !rememberMe ? "2h" : "30d"
         });
 
         return res.json({ token });
