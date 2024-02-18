@@ -16,7 +16,7 @@ import validateWithSchema from "./middlewares/validateWithSchema";
 
 import User from "../models/User";
 
-import { NotFoundError } from "../errors";
+import { UnauthorizedError } from "../errors";
 
 const SECRET = process.env.EXPRESS_JWT_AUTHENTICATION_SECRET!;
 
@@ -38,7 +38,7 @@ router.post(
         const user = await User.findOne({ email });
 
         if (!user || !bcrypt.compareSync(password, user.hash))
-            return next(new NotFoundError(
+            return next(new UnauthorizedError(
                 "No user found with the given credentials."));
 
         const token = jwt.sign({ sub: user._id }, SECRET, {

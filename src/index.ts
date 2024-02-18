@@ -4,11 +4,11 @@ import express, {
     Response
 } from "express";
 
-import mongoose from "mongoose";
-
 import cors from "cors";
-
 import { ZodError } from "zod";
+import { AxiosError } from "axios";
+
+import mongoose from "mongoose";
 
 import "dotenv/config";
 
@@ -17,7 +17,11 @@ import users from "./routers/users";
 import playlists from "./routers/playlists";
 import spotify from "./routers/spotify";
 
-import { HttpError } from "./errors";
+import { 
+    HttpError,
+    BadRequestError,
+    UnauthorizedError
+} from "./errors";
 
 const app = express();
 
@@ -33,26 +37,9 @@ app.use("/api/playlists", playlists);
 app.use("/api/spotify", spotify);
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-    if (error instanceof ZodError) {
-        res.status(400);
-
-        return res.json({
-            errors: Object.fromEntries((error).errors.map(
-                error => [ error.path[0], error.message ]))
-        });
-    }
-
-    next(error);
-});
-
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-    if (error instanceof HttpError) {
-        res.status(error.code);
-
-        return res.json({
-            error: error.message
-        })
-    }
+    if (error instanceof ZodError)
+        return next(new BadRequestError(
+            error.errors[0].message));
 
     next(error);
 });
@@ -68,17 +55,26 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
         case "MissingTokenError":
         case "RevokedTokenError":
         case "ClaimNotAllowedError":
-            res.status(401);
-
-            return res.json({ 
-                error: error.message
-            });
+            return next(new UnauthorizedError(
+                error.message));
     }
 
     next(error);
 });
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    if (error instanceof HttpError) {
+        res.status(error.code);
+
+        return res.json({
+            error: error.message
+        });
+    }
+
+    next(error);
+});
+
+app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
     console.log(error);
 
     res.status(500);
