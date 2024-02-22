@@ -35,7 +35,7 @@ export interface IPlaylistPreview {
     public: boolean;
     tags: mongoose.Types.Array<string>;
     totalTracks: number;
-    totalFollowers: number;
+    followers: mongoose.Types.DocumentArray<IUser>;
 }
 
 export interface IThumbnail {
@@ -101,7 +101,7 @@ schema.static("getPreviews",
             public: 1,
             tags: 1,
             totalTracks: { $size: "$tracks" },
-            totalFollowers: { $size: "$followers" }
+            followers: 1
         });
     }
 );
