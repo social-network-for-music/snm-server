@@ -168,6 +168,7 @@ router.get(
         const _id = req.params.id;
 
         Playlist.findById(_id)
+            .populate("owner", "-email -artists -genres")
             .then(playlist => res.json(playlist))
     }
 );
