@@ -20,7 +20,9 @@ import spotify from "./routers/spotify";
 import { 
     HttpError,
     BadRequestError,
-    UnauthorizedError
+    UnauthorizedError,
+
+    TooManyRequestsError
 } from "./errors";
 
 const app = express();
@@ -40,6 +42,15 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof ZodError)
         return next(new BadRequestError(
             error.errors[0].message));
+
+    next(error);
+});
+
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+    if (error instanceof AxiosError)
+        if (error.response?.status == 429)
+            return next(new TooManyRequestsError(
+                "Too many requests, try again later..."));
 
     next(error);
 });
