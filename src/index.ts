@@ -12,7 +12,7 @@ import mongoose from "mongoose";
 
 import swaggerUi from "swagger-ui-express";
 
-import swaggerDocument from "../swagger/swagger.json";
+import swaggerDocument from "../swagger/output.json";
 
 import "dotenv/config";
 
@@ -44,11 +44,36 @@ app.use(
     swaggerUi.setup(swaggerDocument)
 );
 
-app.use("/api/auth", auth);
+app.use("/api/auth", auth
+    // #swagger.tags = ["auth"]
+);
 
-app.use("/api/users", users);
-app.use("/api/playlists", playlists);
-app.use("/api/spotify", spotify);
+app.use("/api/users", users
+    /*  #swagger.tags = ["user"]
+
+        #swagger.security = [{
+            "JWT": []
+        }]
+    */
+);
+
+app.use("/api/playlists", playlists
+    /*  #swagger.tags = ["playlist"]
+
+        #swagger.security = [{
+            "JWT": []
+        }]
+    */
+);
+
+app.use("/api/spotify", spotify
+    /*  #swagger.tags = ["spotify"]
+
+        #swagger.security = [{
+            "JWT": []
+        }]
+    */
+);
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (error instanceof ZodError)
@@ -108,6 +133,8 @@ app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
 });
 
 app.get("/api/ping", (_: Request, res: Response) => {
+    // #swagger.tags = ["general"]
+
     res.json({ ping: 1 });
 })
 

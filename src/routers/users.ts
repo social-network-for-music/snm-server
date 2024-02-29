@@ -32,6 +32,14 @@ router.get(
     "/",
     expressJwtAuthentication({}),
     (req: Request, res: Response) => {
+        /*  #swagger.summary = "Returns the current user"
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/User"
+                }
+            }
+        */
         User.findById(req.user!.sub)
             .then(user => res.json(user));
     }
@@ -60,6 +68,33 @@ router.post(
         })
     }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Registers a new user to the service"
+
+            #swagger.parameters["body"] = {
+                in: "body",
+
+                schema: {
+                    email: "gordon.freeman@hotmail.com",
+                    username: "gordon.freeman",
+                    password: "•••••••••••••••"
+                }
+            }
+
+            #swagger.responses[201] = {
+                schema: {
+                    _id: "65a3105e29c6516ab2dd1b38",
+                    email: "gordon.freeman@hotmail.com",
+                    username: "gordon.freeman",
+                    artists: [],
+                    genres: []
+                }
+            }
+
+            #swagger.responses[400]
+
+            #swagger.security = null
+        */
+
         const { email, username, password } = req.body;
 
         const salt = bcrypt.genSaltSync(10);
@@ -108,6 +143,33 @@ router.patch(
             .strict()
     }),
     async (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Updates the current user's profile"
+
+            #swagger.parameters["body"] = {
+                in: "body",
+
+                schema: {
+                    username: "gordon.freeman",
+                    artists: [
+                        "59rqdbDiB9oXuZggah1syh",
+                        "1dfeR4HaWDbWqFHLkxsg1d",
+                        "711MCceyCBcFnzjGY4Q7Un"
+                    ],
+                    genres: [
+                        "rock"
+                    ]
+                }
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/User"
+                }
+            }
+
+            #swagger.responses[400]
+        */
+
         User.findByIdAndUpdate(req.user!.sub, req.body, { new: true })
             .then(user => res.json(user))
             .catch(error => next(error));
@@ -118,6 +180,11 @@ router.delete(
     "/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Permanently deletes the current user from the service"
+
+            #swagger.responses[204]
+        */
+
         const owner = req.user!.sub;
 
         User.findByIdAndDelete(owner)
@@ -147,6 +214,23 @@ router.patch(
                 "Your new password can't be equal to your current one.")
     }),
     async (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Changes the current user's password"
+
+            #swagger.parameters["body"] = {
+                in: "body",
+
+                schema: {
+                    password: "••••••••••••",
+
+                    oldPassword: "•••••••••••••••"
+                }
+            }
+
+            #swagger.responses[204]
+
+            #swagger.responses[400]
+        */
+
         const { password, oldPassword } = req.body;
 
         const user = await User.findById(req.user!.sub);

@@ -68,7 +68,7 @@ export default class Spotify {
     }
 
     public genres() {
-        return this.middleware('/recommendations/available-genre-seeds');
+        return this.middleware("/recommendations/available-genre-seeds");
     }
 
     public recommendations(artists: string[], genres: string[]) {
