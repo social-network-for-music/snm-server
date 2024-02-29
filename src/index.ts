@@ -10,9 +10,14 @@ import { AxiosError } from "axios";
 
 import mongoose from "mongoose";
 
+import swaggerUi from "swagger-ui-express";
+
+import swaggerDocument from "../swagger/swagger.json";
+
 import "dotenv/config";
 
 import auth from "./routers/auth";
+
 import users from "./routers/users";
 import playlists from "./routers/playlists";
 import spotify from "./routers/spotify";
@@ -33,7 +38,14 @@ app.use(cors());
 
 app.use(express.json());
 
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument)
+);
+
 app.use("/api/auth", auth);
+
 app.use("/api/users", users);
 app.use("/api/playlists", playlists);
 app.use("/api/spotify", spotify);
