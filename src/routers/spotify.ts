@@ -13,13 +13,40 @@ import {
     NotFoundError 
 } from "../errors";
 
-import User from "../models/User";
+import User, { IUser } from "../models/User";
 
 const SDK = new Spotify({
     clientId: process.env.SPOTIFY_CLIENT_ID!,
 
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET!
 });
+
+function favorites(user: IUser): [string[], string[]] {
+    if (user.artists.length + user.genres.length <= 5)
+        return [user.artists, user.genres];
+
+    const items = [
+        ...user.artists.map(artist => ({ value: artist, source: "artist" })),
+        ...user.genres.map(genre => ({ value: genre, source: "genre" }))
+    ];
+
+    const artists: string[] = [ ],
+          genres:  string[] = [ ];
+
+    for (let i = 0; i < 5; i++) {
+        const index = Math.floor(
+            Math.random() * items.length);
+
+        if (items[index].source == "artist")
+            artists.push(items[index].value);
+        else if (items[index].source == "genre")
+            genres.push(items[index].value);
+
+        items.splice(index, i);
+    }
+
+    return [artists, genres];
+}
 
 const router = express.Router();
 
@@ -71,11 +98,9 @@ router.get(
     async (req: Request, res: Response, next: NextFunction) => {
         const user = await User.findById(req.user!.sub);
 
-        if (user!.artists.length + user!.genres.length > 5)
-            return next(new BadRequestError("Spotify doesn't support recommendations " +
-                "for users with more than 5 favorite artists and genres."));
+        const [artists, genres] = favorites(user!);
 
-        SDK.recommendations(user!.artists, user!.genres)
+        SDK.recommendations(artists, genres)
             .then(tracks => res.json(tracks))
             .catch(error => {
                 if (error.response?.status == 400)
