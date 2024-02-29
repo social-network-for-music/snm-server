@@ -47,12 +47,16 @@ router.post(
                     "E-mail address already in use by another account."),
 
             username: z.string()
-                .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-                    "You must provide a valid username."),
+                .regex(/^(?=.{3,15}$)(?![\-_.])(?!.*[_.]{2})[a-zA-Z0-9._\-]+(?<![\-_.])$/,
+                    "Your username can only contain alpha-numeric characters, dots \
+                        dashes and underscores (and it must be between 3 and 15 \
+                            characters long)."),
 
             password: z.string()
-                .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
-                    "You must provide a valid password.")
+                .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,16}$/,
+                    "Your password must contain at least one uppercase character, \
+                        one lowercase character, a digit (and be between 8 and \
+                            16 characters long).")
         })
     }),
     (req: Request, res: Response, next: NextFunction) => {
@@ -74,8 +78,10 @@ router.patch(
     validateWithSchema({
         body: z.object({
             username: z.string()
-                .regex(/^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-                    "You must provide a valid username."),
+                .regex(/^(?=.{3,15}$)(?![\-_.])(?!.*[_.]{2})[a-zA-Z0-9._\-]+(?<![\-_.])$/,
+                    "Your username can only contain alpha-numeric characters, dots \
+                        dashes and underscores (and it must be between 3 and 15 \
+                            characters long)."),
 
             artists: z.array(
                 z.string()
@@ -94,6 +100,8 @@ router.patch(
 
             genres: z.array(
                 z.string()
+                    .trim()
+                        .min(1, "You must provide a valid genre.")
             )
         })
             .partial()
@@ -128,8 +136,10 @@ router.patch(
     validateWithSchema({
         body: z.object({
             password: z.string()
-                .regex(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/,
-                    "You must provide a valid password."),
+                .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,16}$/,
+                    "Your password must contain at least one uppercase character, \
+                        one lowercase character, a digit (and be between 8 and \
+                            16 characters long)."),
 
             oldPassword: z.string()
         })

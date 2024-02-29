@@ -15,19 +15,17 @@ export interface IUser {
 const schema = new Schema<IUser>({
     email: {
         type: String,
-        match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
         required: true,
-
         unique: true
     },
     username: {
         type: String,
-        match: /^(?=.{3,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+
         required: true
     },
     hash: { 
         type: String,
-        match: /^\$2[ayb]\$.{56}$/,
+
         required: true 
     },
     artists: {

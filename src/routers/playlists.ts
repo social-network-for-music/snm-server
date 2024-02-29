@@ -193,8 +193,10 @@ router.post(
     validateWithSchema({
         body: z.object({
             title: z.string()
-                .regex(/^[\w\-.,!?: ]{3,30}$/,
-                    "You must provide a valid title."),
+                .trim()
+                    .min(1, "The title can't be an empty string!")
+                    .min(3, "The title can't be shorter than 3 characters.")
+                    .max(30, "The title can't be longer than 30 characters."),
 
             description: z.string()
                 .nullish(),
@@ -223,15 +225,20 @@ router.patch(
     validateWithSchema({
         body: z.object({
             title: z.string()
-                .regex(/^[\w\-.,!?: ]{3,30}$/,
-                    "You must provide a valid title."),
+                .trim()
+                    .min(1, "The title can't be an empty string!")
+                    .min(3, "The title can't be shorter than 3 characters.")
+                    .max(30, "The title can't be longer than 30 characters."),
 
             description: z.string()
                 .nullable(),
             
             tags: z.array(
                 z.string()
-                    .regex(/^[a-z0\- ]{3,18}$/)
+                    .regex(/^[a-zA-Z0-9\-]{3,15}$/,
+                        "A tag can only contain alpha-numeric characters \
+                            and dashes (and it must be between 3 and 15 \
+                                characters long).")
             )
         })
             .partial()

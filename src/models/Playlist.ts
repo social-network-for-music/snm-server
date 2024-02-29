@@ -56,7 +56,7 @@ const schema = new Schema<IPlaylist, PlaylistModel>({
     },
     title: {
         type: String,
-        match: /^[\w\-.,!?: ]{3,30}$/,
+
         required: true
     },
     description: {
@@ -68,11 +68,7 @@ const schema = new Schema<IPlaylist, PlaylistModel>({
         required: true
     },
     tags: {
-        type: [{
-            type: String,
-
-            match: /^[a-z0\- ]{3,18}$/
-        }],
+        type: [String],
         default: [],
         required: true
     },
