@@ -18,6 +18,8 @@ import { BadRequestError } from "../errors";
 
 import User from "../models/User";
 
+import Playlist from "../models/Playlist";
+
 const SDK = new Spotify({
     clientId: process.env.SPOTIFY_CLIENT_ID!,
 
@@ -108,8 +110,14 @@ router.delete(
     "/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
-        User.findByIdAndDelete(req.user!.sub)
-            .then(_ => res.status(204).end())
+        const owner = req.user!.sub;
+
+        User.findByIdAndDelete(owner)
+            .then(_ => {
+                Playlist.deleteMany({ owner })
+                    .then(_ => res.status(204).end())
+                    .catch(error => next(error));
+            })
             .catch(error => next(error));
     }
 );
