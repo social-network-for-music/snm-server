@@ -5,7 +5,7 @@
     "description": "A RESTful API that works as the core of SNM (Social Network for Music).",
     "version": "1.0.0"
   },
-  "host": "localhost:80",
+  "host": "davi0k-vps.com",
   "basePath": "/",
   "schemes": [
     "https"

@@ -8,7 +8,7 @@ swaggerAutogen(
             title: "Social Network for Music | API",
             description: "A RESTful API that works as the core of SNM (Social Network for Music)."
         },
-        host: "localhost:80",
+        host: "davi0k-vps.com",
         schemes: [ "https" ],
         definitions: {
             User: {
