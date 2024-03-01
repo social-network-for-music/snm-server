@@ -24,10 +24,23 @@
         "tags": [
           "general"
         ],
+        "summary": "Sends a ping to the service",
         "description": "",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ping": {
+                  "type": "number",
+                  "example": 1
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         }
       }

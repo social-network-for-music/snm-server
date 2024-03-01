@@ -135,7 +135,16 @@ app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
 });
 
 app.get("/api/ping", (_: Request, res: Response) => {
-    // #swagger.tags = ["general"]
+    /*  #swagger.tags = ["general"]
+
+        #swagger.summary = "Sends a ping to the service"
+
+        #swagger.responses[200] = {
+            schema: {
+                ping: 1
+            }
+        }
+    */
 
     res.json({ ping: 1 });
 })
