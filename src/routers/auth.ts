@@ -58,7 +58,8 @@ router.post(
 
         const { email, password, rememberMe } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne(
+            { email: email.toLowerCase() });
 
         if (!user || !bcrypt.compareSync(password, user.hash))
             return next(new UnauthorizedError(

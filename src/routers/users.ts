@@ -50,6 +50,7 @@ router.post(
     validateWithSchema({
         body: z.object({
             email: z.string()
+                .toLowerCase()
                 .email("You must provide a valid e-mail address.")
                 .refine(async (email) => !(await User.findOne({ email })),
                     "E-mail address already in use by another account."),
@@ -100,8 +101,14 @@ router.post(
         const { email, username, password } = req.body;
 
         const salt = bcrypt.genSaltSync(10);
+
         const hash = bcrypt.hashSync(password, salt);
-        const user = new User({ email, username, hash });
+
+        const user = new User({ 
+            email: email.toLowerCase(), 
+            username, 
+            hash 
+        });
 
         user.save()
             .then(data => res.status(201).json(data))
