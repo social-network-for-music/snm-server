@@ -137,6 +137,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -205,6 +206,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -257,7 +259,7 @@
         "tags": [
           "user"
         ],
-        "summary": "Permanently deletes the current user from the service",
+        "summary": "Deletes the current user from the service",
         "description": "",
         "responses": {
           "204": {
@@ -282,6 +284,7 @@
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
@@ -317,27 +320,40 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Retrieves public playlists",
         "description": "",
         "parameters": [
           {
             "name": "title",
+            "description": "Returns only playlists that match the following title",
             "in": "query",
             "type": "string"
           },
           {
             "name": "tag",
+            "description": "Returns only playlists that contain the following tag",
             "in": "query",
             "type": "string"
           },
           {
             "name": "track",
+            "description": "Returns only playlists that contain the following track",
             "in": "query",
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlaylistPreview"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         },
         "security": [
@@ -352,17 +368,31 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Returns the current user's playlists",
         "description": "",
         "parameters": [
           {
             "name": "select",
+            "description": "Allows to filter by category [all | owner | follower]",
             "in": "query",
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlaylistPreview"
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         },
         "security": [
@@ -375,10 +405,90 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Creates a new playlist",
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Midnight tunes vol.2"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "All the best night tunes to play at 00:00am!"
+                },
+                "public": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "example": "65df6fe0aef53429367c76c9"
+                },
+                "owner": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "example": "65a3105e29c6516ab2dd1b38"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "davi0k"
+                    }
+                  }
+                },
+                "title": {
+                  "type": "string",
+                  "example": "Midnight tunes vol.2"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "All the best night tunes to play at 00:00am!"
+                },
+                "public": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "tags": {
+                  "type": "array",
+                  "example": [],
+                  "items": {}
+                },
+                "tracks": {
+                  "type": "array",
+                  "example": [],
+                  "items": {}
+                },
+                "followers": {
+                  "type": "array",
+                  "example": [],
+                  "items": {}
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         },
         "security": [
@@ -393,18 +503,32 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Retrieves a playlist's full view",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Playlist"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -417,18 +541,59 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Updates a current user's playlist",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Midnight tunes vol.2"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "All the best night tunes to play at 00:00am!"
+                },
+                "tags": {
+                  "type": "array",
+                  "example": [
+                    "night"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Playlist"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -441,18 +606,29 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Deletes a current user's playlist",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           }
         ],
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -467,18 +643,75 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Retrieves a playlist's thumbnail",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sizes": {
+                  "type": "object",
+                  "properties": {
+                    "64": {
+                      "type": "array",
+                      "example": [
+                        "https://i.scdn.co/image/ab67616d00004851f3aa0e6ca22a382007f61e4d",
+                        "https://i.scdn.co/image/ab67616d00004851fff2cb485c36a6d8f639bdba",
+                        "https://i.scdn.co/image/ab67616d00004851b98afa12c212cbbda4f1799b"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "300": {
+                      "type": "array",
+                      "example": [
+                        "https://i.scdn.co/image/ab67616d00001e02f3aa0e6ca22a382007f61e4d",
+                        "https://i.scdn.co/image/ab67616d00001e02fff2cb485c36a6d8f639bdba",
+                        "https://i.scdn.co/image/ab67616d00001e02b98afa12c212cbbda4f1799b"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "640": {
+                      "type": "array",
+                      "example": [
+                        "https://i.scdn.co/image/ab67616d0000b273f3aa0e6ca22a382007f61e4d",
+                        "https://i.scdn.co/image/ab67616d0000b273fff2cb485c36a6d8f639bdba",
+                        "https://i.scdn.co/image/ab67616d0000b273b98afa12c212cbbda4f1799b"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -493,24 +726,39 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Adds a track to a playlist",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           },
           {
             "name": "track",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A track's ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Playlist"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -525,24 +773,39 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Removes a track from a playlist",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           },
           {
             "name": "track",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A track's ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Playlist"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -557,18 +820,29 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Follows a public playlist",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Playlist"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -583,18 +857,29 @@
         "tags": [
           "playlist"
         ],
+        "summary": "Unfollows a public playlist",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "A playlist's ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Playlist"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         },
         "security": [
@@ -778,6 +1063,712 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "Playlist": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65df6fe0aef53429367c76c9"
+        },
+        "owner": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65a3105e29c6516ab2dd1b38"
+            },
+            "username": {
+              "type": "string",
+              "example": "davi0k"
+            }
+          }
+        },
+        "title": {
+          "type": "string",
+          "example": "Midnight tunes vol.2"
+        },
+        "description": {
+          "type": "string",
+          "example": "All the best night tunes to play at 00:00am!"
+        },
+        "public": {
+          "type": "boolean",
+          "example": true
+        },
+        "tags": {
+          "type": "array",
+          "example": [
+            "night"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "album": {
+                "type": "object",
+                "properties": {
+                  "album_type": {
+                    "type": "string",
+                    "example": "album"
+                  },
+                  "artists": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "external_urls": {
+                          "type": "object",
+                          "properties": {
+                            "spotify": {
+                              "type": "string",
+                              "example": "https://open.spotify.com/artist/67hb7towEyKvt5Z8Bx306c"
+                            }
+                          }
+                        },
+                        "href": {
+                          "type": "string",
+                          "example": "https://api.spotify.com/v1/artists/67hb7towEyKvt5Z8Bx306c"
+                        },
+                        "id": {
+                          "type": "string",
+                          "example": "67hb7towEyKvt5Z8Bx306c"
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Empire Of The Sun"
+                        },
+                        "type": {
+                          "type": "string",
+                          "example": "artist"
+                        },
+                        "uri": {
+                          "type": "string",
+                          "example": "spotify:artist:67hb7towEyKvt5Z8Bx306c"
+                        }
+                      }
+                    }
+                  },
+                  "available_markets": {
+                    "type": "array",
+                    "example": [
+                      "AR",
+                      "AU",
+                      "AT",
+                      "BE",
+                      "BO",
+                      "BR",
+                      "BG",
+                      "CA",
+                      "CL",
+                      "CO",
+                      "CR",
+                      "CY",
+                      "CZ",
+                      "DK",
+                      "DO",
+                      "DE",
+                      "EC",
+                      "EE",
+                      "SV",
+                      "FI",
+                      "FR",
+                      "GR",
+                      "GT",
+                      "HN",
+                      "HK",
+                      "HU",
+                      "IS",
+                      "IE",
+                      "IT",
+                      "LV",
+                      "LT",
+                      "LU",
+                      "MY",
+                      "MT",
+                      "MX",
+                      "NL",
+                      "NZ",
+                      "NI",
+                      "NO",
+                      "PA",
+                      "PY",
+                      "PE",
+                      "PH",
+                      "PL",
+                      "PT",
+                      "SG",
+                      "SK",
+                      "ES",
+                      "SE",
+                      "CH",
+                      "TW",
+                      "TR",
+                      "UY",
+                      "US",
+                      "GB",
+                      "AD",
+                      "LI",
+                      "MC",
+                      "ID",
+                      "JP",
+                      "TH",
+                      "VN",
+                      "RO",
+                      "IL",
+                      "ZA",
+                      "SA",
+                      "AE",
+                      "BH",
+                      "QA",
+                      "OM",
+                      "KW",
+                      "EG",
+                      "MA",
+                      "DZ",
+                      "TN",
+                      "LB",
+                      "JO",
+                      "PS",
+                      "IN",
+                      "BY",
+                      "KZ",
+                      "MD",
+                      "UA",
+                      "AL",
+                      "BA",
+                      "HR",
+                      "ME",
+                      "MK",
+                      "RS",
+                      "SI",
+                      "KR",
+                      "BD",
+                      "PK",
+                      "LK",
+                      "GH",
+                      "KE",
+                      "NG",
+                      "TZ",
+                      "UG",
+                      "AG",
+                      "AM",
+                      "BS",
+                      "BB",
+                      "BZ",
+                      "BT",
+                      "BW",
+                      "BF",
+                      "CV",
+                      "CW",
+                      "DM",
+                      "FJ",
+                      "GM",
+                      "GE",
+                      "GD",
+                      "GW",
+                      "GY",
+                      "HT",
+                      "JM",
+                      "KI",
+                      "LS",
+                      "LR",
+                      "MW",
+                      "MV",
+                      "ML",
+                      "MH",
+                      "FM",
+                      "NA",
+                      "NR",
+                      "NE",
+                      "PW",
+                      "PG",
+                      "WS",
+                      "SM",
+                      "ST",
+                      "SN",
+                      "SC",
+                      "SL",
+                      "SB",
+                      "KN",
+                      "LC",
+                      "VC",
+                      "SR",
+                      "TL",
+                      "TO",
+                      "TT",
+                      "TV",
+                      "VU",
+                      "AZ",
+                      "BN",
+                      "BI",
+                      "KH",
+                      "CM",
+                      "TD",
+                      "KM",
+                      "GQ",
+                      "SZ",
+                      "GA",
+                      "GN",
+                      "KG",
+                      "LA",
+                      "MO",
+                      "MR",
+                      "MN",
+                      "NP",
+                      "RW",
+                      "TG",
+                      "UZ",
+                      "ZW",
+                      "BJ",
+                      "MG",
+                      "MU",
+                      "MZ",
+                      "AO",
+                      "CI",
+                      "DJ",
+                      "ZM",
+                      "CD",
+                      "CG",
+                      "IQ",
+                      "LY",
+                      "TJ",
+                      "VE",
+                      "ET",
+                      "XK"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "external_urls": {
+                    "type": "object",
+                    "properties": {
+                      "spotify": {
+                        "type": "string",
+                        "example": "https://open.spotify.com/album/5B6XfyHHYawyLkEvNvhSPh"
+                      }
+                    }
+                  },
+                  "href": {
+                    "type": "string",
+                    "example": "https://api.spotify.com/v1/albums/5B6XfyHHYawyLkEvNvhSPh"
+                  },
+                  "id": {
+                    "type": "string",
+                    "example": "5B6XfyHHYawyLkEvNvhSPh"
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "height": {
+                          "type": "number",
+                          "example": 64
+                        },
+                        "url": {
+                          "type": "string",
+                          "example": "https://i.scdn.co/image/ab67616d00004851f3aa0e6ca22a382007f61e4d"
+                        },
+                        "width": {
+                          "type": "number",
+                          "example": 64
+                        }
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Walking On A Dream (10th Anniversary Edition)"
+                  },
+                  "release_date": {
+                    "type": "string",
+                    "example": "2008-10-03"
+                  },
+                  "release_date_precision": {
+                    "type": "string",
+                    "example": "day"
+                  },
+                  "total_tracks": {
+                    "type": "number",
+                    "example": 16
+                  },
+                  "type": {
+                    "type": "string",
+                    "example": "album"
+                  },
+                  "uri": {
+                    "type": "string",
+                    "example": "spotify:album:5B6XfyHHYawyLkEvNvhSPh"
+                  }
+                }
+              },
+              "artists": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "external_urls": {
+                      "type": "object",
+                      "properties": {
+                        "spotify": {
+                          "type": "string",
+                          "example": "https://open.spotify.com/artist/67hb7towEyKvt5Z8Bx306c"
+                        }
+                      }
+                    },
+                    "href": {
+                      "type": "string",
+                      "example": "https://api.spotify.com/v1/artists/67hb7towEyKvt5Z8Bx306c"
+                    },
+                    "id": {
+                      "type": "string",
+                      "example": "67hb7towEyKvt5Z8Bx306c"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Empire Of The Sun"
+                    },
+                    "type": {
+                      "type": "string",
+                      "example": "artist"
+                    },
+                    "uri": {
+                      "type": "string",
+                      "example": "spotify:artist:67hb7towEyKvt5Z8Bx306c"
+                    }
+                  }
+                }
+              },
+              "available_markets": {
+                "type": "array",
+                "example": [
+                  "AR",
+                  "AU",
+                  "AT",
+                  "BE",
+                  "BO",
+                  "BR",
+                  "BG",
+                  "CA",
+                  "CL",
+                  "CO",
+                  "CR",
+                  "CY",
+                  "CZ",
+                  "DK",
+                  "DO",
+                  "DE",
+                  "EC",
+                  "EE",
+                  "SV",
+                  "FI",
+                  "FR",
+                  "GR",
+                  "GT",
+                  "HN",
+                  "HK",
+                  "HU",
+                  "IS",
+                  "IE",
+                  "IT",
+                  "LV",
+                  "LT",
+                  "LU",
+                  "MY",
+                  "MT",
+                  "MX",
+                  "NL",
+                  "NZ",
+                  "NI",
+                  "NO",
+                  "PA",
+                  "PY",
+                  "PE",
+                  "PH",
+                  "PL",
+                  "PT",
+                  "SG",
+                  "SK",
+                  "ES",
+                  "SE",
+                  "CH",
+                  "TW",
+                  "TR",
+                  "UY",
+                  "US",
+                  "GB",
+                  "AD",
+                  "LI",
+                  "MC",
+                  "ID",
+                  "JP",
+                  "TH",
+                  "VN",
+                  "RO",
+                  "IL",
+                  "ZA",
+                  "SA",
+                  "AE",
+                  "BH",
+                  "QA",
+                  "OM",
+                  "KW",
+                  "EG",
+                  "MA",
+                  "DZ",
+                  "TN",
+                  "LB",
+                  "JO",
+                  "PS",
+                  "IN",
+                  "BY",
+                  "KZ",
+                  "MD",
+                  "UA",
+                  "AL",
+                  "BA",
+                  "HR",
+                  "ME",
+                  "MK",
+                  "RS",
+                  "SI",
+                  "KR",
+                  "BD",
+                  "PK",
+                  "LK",
+                  "GH",
+                  "KE",
+                  "NG",
+                  "TZ",
+                  "UG",
+                  "AG",
+                  "AM",
+                  "BS",
+                  "BB",
+                  "BZ",
+                  "BT",
+                  "BW",
+                  "BF",
+                  "CV",
+                  "CW",
+                  "DM",
+                  "FJ",
+                  "GM",
+                  "GE",
+                  "GD",
+                  "GW",
+                  "GY",
+                  "HT",
+                  "JM",
+                  "KI",
+                  "LS",
+                  "LR",
+                  "MW",
+                  "MV",
+                  "ML",
+                  "MH",
+                  "FM",
+                  "NA",
+                  "NR",
+                  "NE",
+                  "PW",
+                  "PG",
+                  "WS",
+                  "SM",
+                  "ST",
+                  "SN",
+                  "SC",
+                  "SL",
+                  "SB",
+                  "KN",
+                  "LC",
+                  "VC",
+                  "SR",
+                  "TL",
+                  "TO",
+                  "TT",
+                  "TV",
+                  "VU",
+                  "AZ",
+                  "BN",
+                  "BI",
+                  "KH",
+                  "CM",
+                  "TD",
+                  "KM",
+                  "GQ",
+                  "SZ",
+                  "GA",
+                  "GN",
+                  "KG",
+                  "LA",
+                  "MO",
+                  "MR",
+                  "MN",
+                  "NP",
+                  "RW",
+                  "TG",
+                  "UZ",
+                  "ZW",
+                  "BJ",
+                  "MG",
+                  "MU",
+                  "MZ",
+                  "AO",
+                  "CI",
+                  "DJ",
+                  "ZM",
+                  "CD",
+                  "CG",
+                  "IQ",
+                  "LY",
+                  "TJ",
+                  "VE",
+                  "ET",
+                  "XK"
+                ],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "disc_number": {
+                "type": "number",
+                "example": 1
+              },
+              "duration_ms": {
+                "type": "number",
+                "example": 198440
+              },
+              "explicit": {
+                "type": "boolean",
+                "example": false
+              },
+              "external_ids": {
+                "type": "object",
+                "properties": {
+                  "isrc": {
+                    "type": "string",
+                    "example": "AUEI10800039"
+                  }
+                }
+              },
+              "external_urls": {
+                "type": "object",
+                "properties": {
+                  "spotify": {
+                    "type": "string",
+                    "example": "https://open.spotify.com/track/5r5cp9IpziiIsR6b93vcnQ"
+                  }
+                }
+              },
+              "href": {
+                "type": "string",
+                "example": "https://api.spotify.com/v1/tracks/5r5cp9IpziiIsR6b93vcnQ"
+              },
+              "id": {
+                "type": "string",
+                "example": "5r5cp9IpziiIsR6b93vcnQ"
+              },
+              "is_local": {
+                "type": "boolean",
+                "example": false
+              },
+              "name": {
+                "type": "string",
+                "example": "Walking On A Dream"
+              },
+              "popularity": {
+                "type": "number",
+                "example": 82
+              },
+              "preview_url": {},
+              "track_number": {
+                "type": "number",
+                "example": 2
+              },
+              "type": {
+                "type": "string",
+                "example": "track"
+              },
+              "uri": {
+                "type": "string",
+                "example": "spotify:track:5r5cp9IpziiIsR6b93vcnQ"
+              }
+            }
+          }
+        },
+        "followers": {
+          "type": "array",
+          "example": [
+            "65df84edaef53429367c7c77"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PlaylistPreview": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65df6fe0aef53429367c76c9"
+        },
+        "owner": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65a3105e29c6516ab2dd1b38"
+            },
+            "username": {
+              "type": "string",
+              "example": "gordon.freeman"
+            }
+          }
+        },
+        "title": {
+          "type": "string",
+          "example": "City 17's Tunes"
+        },
+        "public": {
+          "type": "boolean",
+          "example": true
+        },
+        "tags": {
+          "type": "array",
+          "example": [
+            "city",
+            "apocalyptic",
+            "dystopia"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "followers": {
+          "type": "array",
+          "example": [
+            "65df84edaef53429367c7c77",
+            "65df90c4aef53429367c7d7f"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "totalTracks": {
+          "type": "number",
+          "example": 3
         }
       }
     }

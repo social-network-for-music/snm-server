@@ -73,6 +73,8 @@ router.post(
             #swagger.parameters["body"] = {
                 in: "body",
 
+                required: "true",
+
                 schema: {
                     email: "gordon.freeman@hotmail.com",
                     username: "gordon.freeman",
@@ -148,6 +150,8 @@ router.patch(
             #swagger.parameters["body"] = {
                 in: "body",
 
+                required: "true",
+
                 schema: {
                     username: "gordon.freeman",
                     artists: [
@@ -180,7 +184,7 @@ router.delete(
     "/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
-        /*  #swagger.summary = "Permanently deletes the current user from the service"
+        /*  #swagger.summary = "Deletes the current user from the service"
 
             #swagger.responses[204]
         */
@@ -218,6 +222,8 @@ router.patch(
 
             #swagger.parameters["body"] = {
                 in: "body",
+
+                required: "true",
 
                 schema: {
                     password: "••••••••••••",

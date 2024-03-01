@@ -95,6 +95,27 @@ router.get(
             .partial()
     }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Retrieves public playlists"
+
+            #swagger.parameters['title'] = {
+                description: "Returns only playlists that match the following title"
+            }
+
+            #swagger.parameters['tag'] = {
+                description: "Returns only playlists that contain the following tag"
+            }
+
+            #swagger.parameters['track'] = {
+                description: "Returns only playlists that contain the following track"
+            }
+
+            #swagger.responses[200] = {
+                schema: [{
+                    $ref: "#/definitions/PlaylistPreview"
+                }]
+            }
+        */
+
         const { 
             title,
             tag,
@@ -140,6 +161,21 @@ router.get(
         })
     }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Returns the current user's playlists"
+
+            #swagger.parameters["select"] = {
+                description: "Allows to filter by category [all | owner | follower]"
+            }
+
+            #swagger.responses[200] = {
+                schema: [{
+                    $ref: "#/definitions/PlaylistPreview"
+                }]
+            }
+
+            #swagger.responses[400]
+        */
+
         const select = req.query.select || "all";
 
         const selectOwner = select == "owner" || select == "all";
@@ -165,6 +201,25 @@ router.get(
     expressJwtAuthentication({}),
     requireAccess(),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Retrieves a playlist's full view"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Playlist"
+                }
+            }
+
+            #swagger.responses[400]
+            #swagger.responses[403]
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         Playlist.findById(_id)
@@ -178,6 +233,41 @@ router.get(
     expressJwtAuthentication({}),
     requireAccess(),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Retrieves a playlist's thumbnail"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    sizes: {
+                        64: [
+                            "https://i.scdn.co/image/ab67616d00004851f3aa0e6ca22a382007f61e4d",
+                            "https://i.scdn.co/image/ab67616d00004851fff2cb485c36a6d8f639bdba",
+                            "https://i.scdn.co/image/ab67616d00004851b98afa12c212cbbda4f1799b"
+                        ],
+                        300: [
+                            "https://i.scdn.co/image/ab67616d00001e02f3aa0e6ca22a382007f61e4d",
+                            "https://i.scdn.co/image/ab67616d00001e02fff2cb485c36a6d8f639bdba",
+                            "https://i.scdn.co/image/ab67616d00001e02b98afa12c212cbbda4f1799b"
+                        ],
+                        640: [
+                            "https://i.scdn.co/image/ab67616d0000b273f3aa0e6ca22a382007f61e4d",
+                            "https://i.scdn.co/image/ab67616d0000b273fff2cb485c36a6d8f639bdba",
+                            "https://i.scdn.co/image/ab67616d0000b273b98afa12c212cbbda4f1799b"
+                        ]
+                    }
+                }
+            }
+
+            #swagger.responses[400]
+            #swagger.responses[403]
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         Playlist.findById(_id)
@@ -206,6 +296,40 @@ router.post(
             .strict()
     }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Creates a new playlist"
+
+            #swagger.parameters["body"] = {
+                in: "body",
+
+                required: "true",
+                
+                schema: {
+                    title: "Midnight tunes vol.2",
+                    description: "All the best night tunes to play at 00:00am!",
+                    public: true
+                },
+            }
+
+            #swagger.responses[201] = {
+                schema: {
+                    _id: "65df6fe0aef53429367c76c9",
+                    owner: {
+                        _id: "65a3105e29c6516ab2dd1b38",
+
+                        username: "davi0k"
+                    },
+                    title: "Midnight tunes vol.2",
+                    description: "All the best night tunes to play at 00:00am!",
+                    public: true,
+                    tags: [],
+                    tracks: [],
+                    followers: []
+                }
+            }
+
+            #swagger.responses[400]
+        */
+
         const playlist = new Playlist({
             owner: req.user!.sub,
             
@@ -245,6 +369,39 @@ router.patch(
             .strict()
     }),
     async (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Updates a current user's playlist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.parameters["body"] = {
+                in: "body",
+
+                required: "true",
+                
+                schema: {
+                    title: "Midnight tunes vol.2",
+                    description: "All the best night tunes to play at 00:00am!",
+                    tags: [ 
+                        "night"
+                    ]
+                },
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Playlist"
+                }
+            }
+
+            #swagger.responses[400]
+            #swagger.responses[403]
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         Playlist.findByIdAndUpdate(_id, req.body, { new: true })
@@ -263,6 +420,31 @@ router.patch(
         })
     }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Adds a track to a playlist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.parameters["track"] = {
+                in: "path",
+                required: "true",
+                description: "A track\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Playlist"
+                }
+            }
+
+            #swagger.responses[400]
+            #swagger.responses[403]
+            #swagger.responses[404]
+        */
+
         function remove(track: unknown): void {
             const _id = req.params.id;
 
@@ -303,6 +485,31 @@ router.patch(
         })
     }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Removes a track from a playlist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.parameters["track"] = {
+                in: "path",
+                required: "true",
+                description: "A track\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Playlist"
+                }
+            }
+
+            #swagger.responses[400]
+            #swagger.responses[403]
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         const update = { 
@@ -324,6 +531,25 @@ router.patch(
     expressJwtAuthentication({}),
     requirePlaylist({ public: true }),
     async (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Follows a public playlist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Playlist"
+                }
+            }
+
+            #swagger.responses[400]
+
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         Playlist.findById(_id)
@@ -350,6 +576,25 @@ router.patch(
     expressJwtAuthentication({}),
     requirePlaylist({ public: true }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Unfollows a public playlist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Playlist"
+                }
+            }
+
+            #swagger.responses[400]
+
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         Playlist.findById(_id)
@@ -376,6 +621,21 @@ router.delete(
     expressJwtAuthentication({}),
     requirePlaylist({ owner: true }),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Deletes a current user's playlist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A playlist\'s ID"
+            }
+
+            #swagger.responses[204]
+
+            #swagger.responses[400]
+            #swagger.responses[403]
+            #swagger.responses[404]
+        */
+
         const _id = req.params.id;
 
         Playlist.findByIdAndDelete(_id)
