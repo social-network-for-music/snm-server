@@ -72,6 +72,8 @@ app.use("/api/spotify", spotify
         #swagger.security = [{
             "JWT": []
         }]
+
+        #swagger.responses[429]
     */
 );
 

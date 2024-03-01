@@ -53,7 +53,22 @@ const router = express.Router();
 router.get(
     "/tracks/",
     expressJwtAuthentication({}),
-    (req: Request, res: Response, next: NextFunction) => { 
+    (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Allows to search spotify's tracks"
+
+            #swagger.parameters["q"] = {
+                description: "Searches tracks that match the following query"
+            }
+
+            #swagger.responses[200] = {
+                schema: [{
+                    $ref: "#/definitions/Track"
+                }]
+            }
+
+            #swagger.responses[400]
+        */
+
         SDK.tracks(<string> req.query.q)
             .then(tracks => res.json(tracks))
             .catch(error => {
@@ -70,6 +85,21 @@ router.get(
     "/artists/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Allows to search spotify's artists"
+
+            #swagger.parameters["q"] = {
+                description: "Searches artists that match the following query"
+            }
+
+            #swagger.responses[200] = {
+                schema: [{
+                    $ref: "#/definitions/Artist"
+                }]
+            }
+
+            #swagger.responses[400]
+        */
+
         SDK.artists(<string> req.query.q)
             .then(artists => res.json(artists))
             .catch(error => {
@@ -86,6 +116,20 @@ router.get(
     "/genres/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => { 
+        /*  #swagger.summary = "Retrieves all spotify's genres"
+
+            #swagger.responses[200] = {
+                schema: {
+                    genres: [
+                        "acoustic",
+                        "afrobeat",
+                        "alt-rock",
+                        "..."
+                    ]
+                }
+            }
+        */
+
         SDK.genres()
             .then(genres => res.json(genres))
             .catch(error => next(error));
@@ -96,6 +140,17 @@ router.get(
     "/recommendations/",
     expressJwtAuthentication({}),
     async (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Returns the current user's recommendations"
+
+            #swagger.responses[200] = {
+                schema: [{
+                    $ref: "#/definitions/Track"
+                }]
+            }
+
+            #swagger.responses[400]
+        */
+
         const user = await User.findById(req.user!.sub);
 
         const [artists, genres] = favorites(user!);
@@ -116,6 +171,25 @@ router.get(
     "/tracks/:id/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Retrieves a spotify's track"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "A track\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Track"
+                }
+            }
+
+            #swagger.responses[400]
+
+            #swagger.responses[404]
+        */
+
         SDK.track(req.params.id)
             .then(track => res.json(track))
             .catch(error => {
@@ -136,6 +210,25 @@ router.get(
     "/artists/:id/",
     expressJwtAuthentication({}),
     (req: Request, res: Response, next: NextFunction) => {
+        /*  #swagger.summary = "Retrieves a spotify's artist"
+
+            #swagger.parameters["id"] = {
+                in: "path",
+                required: "true",
+                description: "An artist\'s ID"
+            }
+
+            #swagger.responses[200] = {
+                schema: {
+                    $ref: "#/definitions/Artist"
+                }
+            }
+
+            #swagger.responses[400]
+
+            #swagger.responses[404]
+        */
+
         SDK.artist(req.params.id)
             .then(artist => res.json(artist))
             .catch(error => {

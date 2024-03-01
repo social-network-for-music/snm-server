@@ -95,7 +95,7 @@ router.get(
             .partial()
     }),
     (req: Request, res: Response, next: NextFunction) => {
-        /*  #swagger.summary = "Retrieves public playlists"
+        /*  #swagger.summary = "Allows to search public playlists"
 
             #swagger.parameters['title'] = {
                 description: "Returns only playlists that match the following title"
