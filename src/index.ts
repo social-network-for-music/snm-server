@@ -4,6 +4,10 @@ import express, {
     Response
 } from "express";
 
+import fs from "fs";
+
+import https from "https";
+
 import cors from "cors";
 import { ZodError } from "zod";
 import { AxiosError } from "axios";
@@ -149,7 +153,13 @@ app.get("/api/ping", (_: Request, res: Response) => {
     res.json({ ping: 1 });
 })
 
-app.listen(port, () => {
+const server = https.createServer({
+    key: fs.readFileSync("../key.pem"),
+
+    cert: fs.readFileSync("../certificate.pem")
+}, app);
+
+server.listen(port, () => {
     mongoose.connect(process.env.MONGODB_URI ||
         "mongodb://127.0.0.1:27017/snm");
 
