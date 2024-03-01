@@ -5,7 +5,7 @@ import express, {
 } from "express";
 
 import fs from "fs";
-
+import path from "path";
 import https from "https";
 
 import cors from "cors";
@@ -154,9 +154,9 @@ app.get("/api/ping", (_: Request, res: Response) => {
 })
 
 const server = https.createServer({
-    key: fs.readFileSync("../key.pem"),
+    key: fs.readFileSync(path.join(__dirname, "../key.pem")),
 
-    cert: fs.readFileSync("../certificate.pem")
+    cert: fs.readFileSync(path.join(__dirname, "../certificate.pem"))
 }, app);
 
 server.listen(port, () => {
