@@ -42,7 +42,7 @@ function favorites(user: IUser): [string[], string[]] {
         else if (items[index].source == "genre")
             genres.push(items[index].value);
 
-        items.splice(index, i);
+        items.splice(index, 1);
     }
 
     return [artists, genres];
